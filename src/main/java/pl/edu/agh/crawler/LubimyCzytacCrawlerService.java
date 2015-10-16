@@ -24,10 +24,10 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
             Element userDescriptionSpan = profileHeaderInfoDiv.getElementsByTag("span").first();
             String userDescription = userDescriptionSpan.ownText();
 
-            Element basicInformationDiv = profileHeaderInfoDiv.after(userDescriptionSpan).child(0);
+            Element basicInformationDiv = profileHeaderInfoDiv.select("div.font-szary-a3.spacer-10-t").first();
             String basicInformation = basicInformationDiv.text();
 
-            return new User(userName, userDescription, basicInformation);
+            return new User(userName, userDescription, basicInformation, userProfileUrl);
 
         } catch (IOException e) {
             e.printStackTrace();

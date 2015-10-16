@@ -12,14 +12,16 @@ public class User {
     private String name;
     private String description;
     private String basicInformation;
+    private String url;
 
     public User() {
     }
 
-    public User(String name, String description, String basicInformation) {
+    public User(String name, String description, String basicInformation, String url) {
         this.name = name;
         this.description = description;
         this.basicInformation = basicInformation;
+        this.url = url;
     }
 
     public Long getId() {
@@ -54,6 +56,14 @@ public class User {
         this.basicInformation = basicInformation;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -61,6 +71,8 @@ public class User {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", basicInformation='" + basicInformation + '\'' +
+                ", url='" + url + '\'' +
                 '}';
     }
+
 }
