@@ -1,2 +1,2 @@
-# na-temat-crawler
-Repository for "Component-oriented Programming" classes at AGH-UST
+# lubimy-czytac-crawler
+Repository for "Data mining" classes at AGH-UST
