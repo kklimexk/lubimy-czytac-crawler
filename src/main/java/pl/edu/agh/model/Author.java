@@ -5,41 +5,33 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "categories", uniqueConstraints = @UniqueConstraint(columnNames = {"name"}))
-public class Category {
+@Table(name = "authors", uniqueConstraints = @UniqueConstraint(columnNames = {"name"}))
+public class Author {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
-    @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name = "categories_books",
-            joinColumns = {@JoinColumn(name = "categoryId")},
-            inverseJoinColumns = {@JoinColumn(name = "bookId")})
-    private Set<Book> books = new HashSet<>();
     private String url;
 
-    public Category() {
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name = "authors_books",
+            joinColumns = {@JoinColumn(name = "authorId")},
+            inverseJoinColumns = {@JoinColumn(name = "bookId")})
+    private Set<Book> books = new HashSet<>();
+
+    public Author() {
     }
 
-    public Category(String name) {
-        this.name = name;
-    }
-
-    public Category(String name, Set<Book> books) {
-        this.name = name;
-        this.books = books;
-    }
-
-    public Category(String name, Set<Book> books, String url) {
-        this.name = name;
-        this.books = books;
-        this.url = url;
-    }
-
-    public Category(String name, String url) {
+    public Author(String name, String url) {
         this.name = name;
         this.url = url;
+    }
+
+    public Author(String name, String url, Set<Book> books) {
+        this.name = name;
+        this.url = url;
+        this.books = books;
     }
 
     public Long getId() {
@@ -58,14 +50,6 @@ public class Category {
         this.name = name;
     }
 
-    public Set<Book> getBooks() {
-        return books;
-    }
-
-    public void setBooks(Set<Book> books) {
-        this.books = books;
-    }
-
     public String getUrl() {
         return url;
     }
@@ -74,12 +58,21 @@ public class Category {
         this.url = url;
     }
 
+    public Set<Book> getBooks() {
+        return books;
+    }
+
+    public void setBooks(Set<Book> books) {
+        this.books = books;
+    }
+
     @Override
     public String toString() {
-        return "Category{" +
+        return "Author{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", url='" + url + '\'' +
+                ", books=" + books +
                 '}';
     }
 }

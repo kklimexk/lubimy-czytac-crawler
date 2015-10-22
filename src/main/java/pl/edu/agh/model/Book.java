@@ -2,6 +2,8 @@ package pl.edu.agh.model;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "books", uniqueConstraints = @UniqueConstraint(columnNames = {"isbn"}))
@@ -11,14 +13,16 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
-    //TODO: author
+    @ManyToMany(mappedBy = "books")
+    private Set<Author> authors = new HashSet<>();
     private Double ratingValue;
     private Integer ratingVotes;
     private Integer ratingReviews;
     private Date datePublished;
     private String isbn;
     private Integer numOfPages;
-    //TODO: category
+    @ManyToMany(mappedBy = "books")
+    private Set<Category> categories = new HashSet<>();
     private String language;
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -27,8 +31,9 @@ public class Book {
     public Book() {
     }
 
-    public Book(String name, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, String language, String description, String url) {
+    public Book(String name, Set<Author> authors, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, String language, String description, String url) {
         this.name = name;
+        this.authors = authors;
         this.ratingValue = ratingValue;
         this.ratingVotes = ratingVotes;
         this.ratingReviews = ratingReviews;
@@ -54,6 +59,14 @@ public class Book {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<Author> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(Set<Author> authors) {
+        this.authors = authors;
     }
 
     public Double getRatingValue() {
@@ -104,6 +117,14 @@ public class Book {
         this.numOfPages = numOfPages;
     }
 
+    public Set<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
+    }
+
     public String getLanguage() {
         return language;
     }
@@ -133,12 +154,14 @@ public class Book {
         return "Book{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", authors=" + authors +
                 ", ratingValue=" + ratingValue +
                 ", ratingVotes=" + ratingVotes +
                 ", ratingReviews=" + ratingReviews +
                 ", datePublished=" + datePublished +
                 ", isbn='" + isbn + '\'' +
                 ", numOfPages=" + numOfPages +
+                ", categories=" + categories +
                 ", language='" + language + '\'' +
                 ", description='" + description + '\'' +
                 ", url='" + url + '\'' +

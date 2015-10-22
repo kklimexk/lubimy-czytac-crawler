@@ -17,6 +17,7 @@
         <mapping class="pl.edu.agh.model.User"/>
         <mapping class="pl.edu.agh.model.Category"/>
         <mapping class="pl.edu.agh.model.Book"/>
+        <mapping class="pl.edu.agh.model.Author"/>
 
     </session-factory>
 </hibernate-configuration>

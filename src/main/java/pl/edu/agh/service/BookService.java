@@ -6,11 +6,8 @@ import pl.edu.agh.model.Book;
 import java.util.List;
 
 public class BookService {
-    private BookDAO bookDAO;
 
-    public BookService(BookDAO bookDAO) {
-        this.bookDAO = bookDAO;
-    }
+    private BookDAO bookDAO = new BookDAO();
 
     public List<Book> getAllBooks() {
         return bookDAO.getAllBooks();
