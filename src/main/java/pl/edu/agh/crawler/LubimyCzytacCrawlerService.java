@@ -5,6 +5,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import pl.edu.agh.model.Author;
 import pl.edu.agh.model.Book;
+import pl.edu.agh.model.Category;
 import pl.edu.agh.model.User;
 import pl.edu.agh.util.CrawlerUtil;
 
@@ -55,15 +56,14 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
             Date datePublished = dateFormat.parse(dBookDetailsDiv.select("dd[itemprop=datePublished]").attr("content"));
             String isbn = dBookDetailsDiv.select("span[itemprop=isbn]").text();
             Integer numOfPages = Integer.parseInt(dBookDetailsDiv.select(":contains(liczba stron)").parents().last().select("dd").text());
-            /*Element categoryEl = dBookDetailsDiv.select("a[itemprop=genre]").first();
-            String categoryName = categoryEl.text();
-            String categoryUrl = "http://lubimyczytac.pl/" + categoryEl.attr("href");
-            Category category = new Category(categoryName, categoryUrl);*/
+
+            Elements categoryElements = dBookDetailsDiv.select("a[itemprop=genre]");
+            Set<Category> categories = categoryElements.stream().map(categoryElem -> new Category(categoryElem.getElementsByTag("span").text(), "http://lubimyczytac.pl/" + categoryElem.attr("href"))).collect(Collectors.toSet());
 
             String language = dBookDetailsDiv.select("dd[itemprop=inLanguage").text();
             String description = doc.select("p.description.regularText").text();
 
-            return new Book(bookName, authors, ratingValue, ratingVotes, ratingAmount, datePublished, isbn, numOfPages, language, description, doc.location());
+            return new Book(bookName, authors, ratingValue, ratingVotes, ratingAmount, datePublished, isbn, numOfPages, categories, language, description, doc.location());
         } catch (ParseException e) {
             e.printStackTrace();
         }

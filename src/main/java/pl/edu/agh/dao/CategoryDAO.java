@@ -27,13 +27,12 @@ public class CategoryDAO {
         return null;
     }
 
-    public void saveCategory(String categoryName) {
+    public void saveCategory(Category category) {
         Session session = null;
         Transaction tx = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            Category category = new Category(categoryName);
             session.save(category);
             tx.commit();
         } catch (Exception e) {

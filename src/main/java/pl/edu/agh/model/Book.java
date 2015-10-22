@@ -13,7 +13,11 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
-    @ManyToMany(mappedBy = "books")
+
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name = "books_authors",
+            joinColumns = {@JoinColumn(name = "bookId")},
+            inverseJoinColumns = {@JoinColumn(name = "authorId")})
     private Set<Author> authors = new HashSet<>();
     private Double ratingValue;
     private Integer ratingVotes;
@@ -21,7 +25,10 @@ public class Book {
     private Date datePublished;
     private String isbn;
     private Integer numOfPages;
-    @ManyToMany(mappedBy = "books")
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name = "books_categories",
+            joinColumns = {@JoinColumn(name = "bookId")},
+            inverseJoinColumns = {@JoinColumn(name = "categoryId")})
     private Set<Category> categories = new HashSet<>();
     private String language;
     @Column(columnDefinition = "TEXT")
@@ -31,7 +38,7 @@ public class Book {
     public Book() {
     }
 
-    public Book(String name, Set<Author> authors, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, String language, String description, String url) {
+    public Book(String name, Set<Author> authors, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, Set<Category> categories, String language, String description, String url) {
         this.name = name;
         this.authors = authors;
         this.ratingValue = ratingValue;
@@ -40,6 +47,7 @@ public class Book {
         this.datePublished = datePublished;
         this.isbn = isbn;
         this.numOfPages = numOfPages;
+        this.categories = categories;
         this.language = language;
         this.description = description;
         this.url = url;

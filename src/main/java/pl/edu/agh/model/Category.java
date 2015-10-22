@@ -12,10 +12,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String name;
-    @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name = "categories_books",
-            joinColumns = {@JoinColumn(name = "categoryId")},
-            inverseJoinColumns = {@JoinColumn(name = "bookId")})
+    @ManyToMany(mappedBy = "categories")
     private Set<Book> books = new HashSet<>();
     private String url;
 
