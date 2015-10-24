@@ -38,6 +38,13 @@ public class Book {
     private String description;
     private String url;
 
+    @ManyToMany(mappedBy = "readBooks")
+    private Set<User> usersReadBooks = new HashSet<>();
+    @ManyToMany(mappedBy = "currentlyReadingBooks")
+    private Set<User> usersCurrentlyReadingBooks = new HashSet<>();
+    @ManyToMany(mappedBy = "wantToReadBooks")
+    private Set<User> usersWantToReadBooks = new HashSet<>();
+
     public Book() {
     }
 
@@ -167,6 +174,30 @@ public class Book {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Set<User> getUsersReadBooks() {
+        return usersReadBooks;
+    }
+
+    public void setUsersReadBooks(Set<User> usersReadBooks) {
+        this.usersReadBooks = usersReadBooks;
+    }
+
+    public Set<User> getUsersCurrentlyReadingBooks() {
+        return usersCurrentlyReadingBooks;
+    }
+
+    public void setUsersCurrentlyReadingBooks(Set<User> usersCurrentlyReadingBooks) {
+        this.usersCurrentlyReadingBooks = usersCurrentlyReadingBooks;
+    }
+
+    public Set<User> getUsersWantToReadBooks() {
+        return usersWantToReadBooks;
+    }
+
+    public void setUsersWantToReadBooks(Set<User> usersWantToReadBooks) {
+        this.usersWantToReadBooks = usersWantToReadBooks;
     }
 
     @Override

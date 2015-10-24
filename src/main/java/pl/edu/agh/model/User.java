@@ -1,6 +1,8 @@
 package pl.edu.agh.model;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"name"}))
@@ -13,6 +15,24 @@ public class User {
     private String description;
     private String basicInformation;
     private String url;
+
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name = "readBooks",
+            joinColumns = {@JoinColumn(name = "userId")},
+            inverseJoinColumns = {@JoinColumn(name = "bookId")})
+    private Set<Book> readBooks = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name = "currentlyReadingBooks",
+            joinColumns = {@JoinColumn(name = "userId")},
+            inverseJoinColumns = {@JoinColumn(name = "bookId")})
+    private Set<Book> currentlyReadingBooks = new HashSet<>();
+
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name = "wantToReadBooks",
+            joinColumns = {@JoinColumn(name = "userId")},
+            inverseJoinColumns = {@JoinColumn(name = "bookId")})
+    private Set<Book> wantToReadBooks = new HashSet<>();
 
     public User() {
     }
@@ -62,6 +82,30 @@ public class User {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Set<Book> getReadBooks() {
+        return readBooks;
+    }
+
+    public void setReadBooks(Set<Book> readBooks) {
+        this.readBooks = readBooks;
+    }
+
+    public Set<Book> getCurrentlyReadingBooks() {
+        return currentlyReadingBooks;
+    }
+
+    public void setCurrentlyReadingBooks(Set<Book> currentlyReadingBooks) {
+        this.currentlyReadingBooks = currentlyReadingBooks;
+    }
+
+    public Set<Book> getWantToReadBooks() {
+        return wantToReadBooks;
+    }
+
+    public void setWantToReadBooks(Set<Book> wantToReadBooks) {
+        this.wantToReadBooks = wantToReadBooks;
     }
 
     @Override
