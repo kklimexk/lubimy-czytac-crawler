@@ -5,10 +5,7 @@ import pl.edu.agh.crawler.LubimyCzytacCrawlerService;
 import pl.edu.agh.http.PageDownloader;
 import pl.edu.agh.model.Book;
 import pl.edu.agh.model.User;
-import pl.edu.agh.service.AuthorService;
-import pl.edu.agh.service.BookService;
-import pl.edu.agh.service.CategoryService;
-import pl.edu.agh.service.UserService;
+import pl.edu.agh.service.*;
 
 import java.io.IOException;
 
@@ -21,6 +18,7 @@ public class LubimyCzytacCrawlerApp {
         BookService bookService = new BookService();
         AuthorService authorService = new AuthorService();
         CategoryService categoryService = new CategoryService();
+        PublisherService publisherService = new PublisherService();
 
         try {
             User user1 = lubimyCzytacCrawlerService.crawlUserFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/2771/lukasz-kuc"));
@@ -40,8 +38,6 @@ public class LubimyCzytacCrawlerApp {
             System.out.println(book1);
             System.out.println(book2);
             System.out.println(book3);
-
-            //bookService.saveBook(book3);
 
         } catch (IOException e) {
             e.printStackTrace();

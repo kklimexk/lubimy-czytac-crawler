@@ -19,6 +19,9 @@ public class Book {
             joinColumns = {@JoinColumn(name = "bookId")},
             inverseJoinColumns = {@JoinColumn(name = "authorId")})
     private Set<Author> authors = new HashSet<>();
+    @ManyToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "publisherId")
+    private Publisher publisher;
     private Double ratingValue;
     private Integer ratingVotes;
     private Integer ratingReviews;
@@ -38,9 +41,10 @@ public class Book {
     public Book() {
     }
 
-    public Book(String name, Set<Author> authors, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, Set<Category> categories, String language, String description, String url) {
+    public Book(String name, Set<Author> authors, Publisher publisher, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, Set<Category> categories, String language, String description, String url) {
         this.name = name;
         this.authors = authors;
+        this.publisher = publisher;
         this.ratingValue = ratingValue;
         this.ratingVotes = ratingVotes;
         this.ratingReviews = ratingReviews;
@@ -75,6 +79,14 @@ public class Book {
 
     public void setAuthors(Set<Author> authors) {
         this.authors = authors;
+    }
+
+    public Publisher getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(Publisher publisher) {
+        this.publisher = publisher;
     }
 
     public Double getRatingValue() {
@@ -163,6 +175,7 @@ public class Book {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", authors=" + authors +
+                ", publisher=" + publisher +
                 ", ratingValue=" + ratingValue +
                 ", ratingVotes=" + ratingVotes +
                 ", ratingReviews=" + ratingReviews +

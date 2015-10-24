@@ -3,10 +3,7 @@ package pl.edu.agh.crawler;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import pl.edu.agh.model.Author;
-import pl.edu.agh.model.Book;
-import pl.edu.agh.model.Category;
-import pl.edu.agh.model.User;
+import pl.edu.agh.model.*;
 import pl.edu.agh.util.CrawlerUtil;
 
 import java.text.DateFormat;
@@ -39,12 +36,21 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
     @Override
     public Book crawlBookFromUrl(Document doc) {
         try {
-
             String bookName = doc.select("h1[itemprop=name]").text();
 
             Elements authorsSpan = doc.select("span[itemprop=author]");
             Elements authorsLinks = authorsSpan.select("a[itemprop=name]");
             Set<Author> authors = authorsLinks.stream().map(author -> new Author(author.text(), author.attr("href"))).collect(Collectors.toSet());
+
+            Element publisherElement = doc.select("a[href*=/wydawnictwo/]").first();
+            String publisherName = "";
+            String publisherLink = "";
+            Publisher publisher = null;
+            if (publisherElement != null) {
+                publisherName = publisherElement.text();
+                publisherLink = publisherElement.attr("href");
+                publisher = new Publisher(publisherName, publisherLink);
+            }
 
             Double ratingValue = Double.parseDouble(doc.getElementById("rating-value").select("span[itemprop=ratingValue]").text().replace(',', '.'));
             Integer ratingVotes = Integer.parseInt(doc.getElementById("rating-votes").select("span[itemprop=ratingCount").text());
@@ -63,7 +69,7 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
             String language = dBookDetailsDiv.select("dd[itemprop=inLanguage").text();
             String description = doc.select("p.description.regularText").text();
 
-            return new Book(bookName, authors, ratingValue, ratingVotes, ratingAmount, datePublished, isbn, numOfPages, categories, language, description, doc.location());
+            return new Book(bookName, authors, publisher, ratingValue, ratingVotes, ratingAmount, datePublished, isbn, numOfPages, categories, language, description, doc.location());
         } catch (ParseException e) {
             e.printStackTrace();
         }
