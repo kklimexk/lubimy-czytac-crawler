@@ -8,6 +8,7 @@ import pl.edu.agh.model.User;
 import pl.edu.agh.service.*;
 
 import java.io.IOException;
+import java.util.Set;
 
 public class LubimyCzytacCrawlerApp {
 
@@ -38,6 +39,9 @@ public class LubimyCzytacCrawlerApp {
             System.out.println(book1);
             System.out.println(book2);
             System.out.println(book3);
+
+            Set<Book> books = lubimyCzytacCrawlerService.crawlUserBooksFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska/polka/2759/przeczytane/miniatury/1"));
+            System.out.println(books);
 
         } catch (IOException e) {
             e.printStackTrace();

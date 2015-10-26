@@ -3,9 +3,11 @@ package pl.edu.agh.crawler;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import pl.edu.agh.http.PageDownloader;
 import pl.edu.agh.model.*;
 import pl.edu.agh.util.CrawlerUtil;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,6 +33,22 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
         String basicInformation = basicInformationDiv.text();
 
         return new User(userName, userDescription, basicInformation, doc.location());
+    }
+
+    @Override
+    public Set<Book> crawlUserBooksFromUrl(Document doc) {
+
+        Elements booksList = doc.select("a[href~=/ksiazka/[0-9]+/]");
+        Set<Book> books = booksList.stream().map(bookEl -> {
+            try {
+                return crawlBookFromUrl(PageDownloader.getPage(bookEl.attr("href")));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }).collect(Collectors.toSet());
+
+        return books;
     }
 
     @Override

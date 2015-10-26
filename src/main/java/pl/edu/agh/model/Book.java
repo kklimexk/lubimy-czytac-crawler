@@ -15,7 +15,7 @@ public class Book {
     private String name;
 
     @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name = "books_authors",
+    @JoinTable(name = "writtenBy",
             joinColumns = {@JoinColumn(name = "bookId")},
             inverseJoinColumns = {@JoinColumn(name = "authorId")})
     private Set<Author> authors = new HashSet<>();
@@ -29,7 +29,7 @@ public class Book {
     private String isbn;
     private Integer numOfPages;
     @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name = "books_categories",
+    @JoinTable(name = "belongsToCategory",
             joinColumns = {@JoinColumn(name = "bookId")},
             inverseJoinColumns = {@JoinColumn(name = "categoryId")})
     private Set<Category> categories = new HashSet<>();

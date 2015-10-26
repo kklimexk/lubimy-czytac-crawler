@@ -17,19 +17,19 @@ public class User {
     private String url;
 
     @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name = "readBooks",
+    @JoinTable(name = "read",
             joinColumns = {@JoinColumn(name = "userId")},
             inverseJoinColumns = {@JoinColumn(name = "bookId")})
     private Set<Book> readBooks = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name = "currentlyReadingBooks",
+    @JoinTable(name = "reading",
             joinColumns = {@JoinColumn(name = "userId")},
             inverseJoinColumns = {@JoinColumn(name = "bookId")})
     private Set<Book> currentlyReadingBooks = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name = "wantToReadBooks",
+    @JoinTable(name = "wantToRead",
             joinColumns = {@JoinColumn(name = "userId")},
             inverseJoinColumns = {@JoinColumn(name = "bookId")})
     private Set<Book> wantToReadBooks = new HashSet<>();
