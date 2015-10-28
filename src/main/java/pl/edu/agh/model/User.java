@@ -27,6 +27,12 @@ public class User {
             joinColumns = {@JoinColumn(name = "userId")},
             inverseJoinColumns = {@JoinColumn(name = "bookId")})
     private Set<Book> currentlyReadingBooks = new HashSet<>();
+    
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name = "friends",
+            joinColumns = {@JoinColumn(name = "userId")},
+            inverseJoinColumns = {@JoinColumn(name = "userId")})
+    private Set<User> friends = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(name = "wantToRead",
