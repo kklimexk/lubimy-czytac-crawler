@@ -8,6 +8,7 @@ import pl.edu.agh.model.User;
 import pl.edu.agh.service.*;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Set;
 
 public class LubimyCzytacCrawlerApp {
@@ -23,25 +24,38 @@ public class LubimyCzytacCrawlerApp {
 
         try {
             User user1 = lubimyCzytacCrawlerService.crawlUserFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/2771/lukasz-kuc"));
-            User user2 = lubimyCzytacCrawlerService.crawlUserFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/12447/mamalgosia"));
-            User user3 = lubimyCzytacCrawlerService.crawlUserFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/1803/shczooreczek"));
-            User user4 = lubimyCzytacCrawlerService.crawlUserFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska"));
-
-            System.out.println(user1);
-            System.out.println(user2);
-            System.out.println(user3);
-            System.out.println(user4);
-
-            Book book1 = lubimyCzytacCrawlerService.crawlBookFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/ksiazka/21938/tezy-o-glupocie-piciu-i-umieraniu"));
-            Book book2 = lubimyCzytacCrawlerService.crawlBookFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/ksiazka/210112/traktat-o-luskaniu-fasoli"));
-            Book book3 = lubimyCzytacCrawlerService.crawlBookFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/ksiazka/47775/kwiat-pustyni-z-namiotu-nomadow-do-nowego-jorku"));
-
-            System.out.println(book1);
-            System.out.println(book2);
-            System.out.println(book3);
-
-            Set<Book> books = lubimyCzytacCrawlerService.crawlUserBooksFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska/polka/2759/przeczytane/miniatury/1"));
-            System.out.println(books);
+            userService.saveUser(user1);
+            Set<Book> user1Books = lubimyCzytacCrawlerService.crawlUserBooksFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/2771/lukasz-kuc"));
+            for(Book book : user1Books) {
+            	bookService.saveBook(book);
+            }
+            user1.setReadBooks(user1Books);
+            userService.saveUser(user1);
+            
+           
+//            User user2 = lubimyCzytacCrawlerService.crawlUserFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/12447/mamalgosia"));
+//            User user3 = lubimyCzytacCrawlerService.crawlUserFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/1803/shczooreczek"));
+//            User user4 = lubimyCzytacCrawlerService.crawlUserFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska"));
+//
+            
+//            System.out.println(user1);
+//            System.out.println(user2);
+//            System.out.println(user3);
+//            System.out.println(user4);
+//
+//            Book book1 = lubimyCzytacCrawlerService.crawlBookFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/ksiazka/21938/tezy-o-glupocie-piciu-i-umieraniu"));
+//            Book book2 = lubimyCzytacCrawlerService.crawlBookFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/ksiazka/210112/traktat-o-luskaniu-fasoli"));
+//            Book book3 = lubimyCzytacCrawlerService.crawlBookFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/ksiazka/47775/kwiat-pustyni-z-namiotu-nomadow-do-nowego-jorku"));
+//            bookService.saveBook(book1);
+//            bookService.saveBook(book2);
+////            
+//            bookService.saveBook(book3);
+//            System.out.println(book1);
+//            System.out.println(book2);
+//            System.out.println(book3);
+//
+//            Set<Book> books = lubimyCzytacCrawlerService.crawlUserBooksFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska/polka/2759/przeczytane/miniatury/1"));
+//            System.out.println(books);
 
         } catch (IOException e) {
             e.printStackTrace();

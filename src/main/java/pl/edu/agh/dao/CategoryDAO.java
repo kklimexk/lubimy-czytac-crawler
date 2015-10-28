@@ -36,9 +36,9 @@ public class CategoryDAO {
             session.save(category);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
+//            if (tx != null) {
+//                tx.rollback();
+//            }
             e.printStackTrace();
         } finally {
             if (session != null) {

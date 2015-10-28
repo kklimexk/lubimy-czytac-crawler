@@ -3,10 +3,15 @@ package pl.edu.agh.dao;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
+import pl.edu.agh.model.Book;
 import pl.edu.agh.model.User;
+import pl.edu.agh.service.BookService;
+import pl.edu.agh.service.UserService;
 import pl.edu.agh.util.HibernateUtil;
 
 import java.util.List;
+import java.util.Optional;
 
 public class UserDAO {
 
@@ -31,14 +36,24 @@ public class UserDAO {
         Session session = null;
         Transaction tx = null;
         try {
+        	
+        	Optional<User> inBase = null;
+            List<User> users = new UserService().getAllUsers();
+            if(users != null) {
+            	inBase = users.stream().filter(u -> u.getUrl().equals(user.getUrl())).findAny();
+            	if(inBase.isPresent()) {
+                	return;
+                }
+            }
+        	
             session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
-            session.save(user);
+            session.merge(user);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
+//            if (tx != null) {
+//                tx.rollback();
+//            }
             e.printStackTrace();
         } finally {
             if (session != null) {

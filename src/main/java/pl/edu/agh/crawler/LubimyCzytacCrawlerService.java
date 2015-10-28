@@ -37,7 +37,7 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
 
     @Override
     public Set<Book> crawlUserBooksFromUrl(Document doc) {
-
+    	doc.appendText("/biblioteczka/miniatury");
         Elements booksList = doc.select("a[href~=/ksiazka/[0-9]+/]");
         Set<Book> books = booksList.stream().map(bookEl -> {
             try {
@@ -77,7 +77,14 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
             Element dBookDetailsDiv = doc.getElementById("dBookDetails");
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date datePublished = dateFormat.parse(dBookDetailsDiv.select("dd[itemprop=datePublished]").attr("content"));
+            
+            String stringDate = dBookDetailsDiv.select("dd[itemprop=datePublished]").attr("content");
+            
+            Date datePublished = null;
+            if(!stringDate.equals("")) {
+            	datePublished = dateFormat.parse(dBookDetailsDiv.select("dd[itemprop=datePublished]").attr("content"));
+            }
+            
             String isbn = dBookDetailsDiv.select("span[itemprop=isbn]").text();
             Integer numOfPages = Integer.parseInt(dBookDetailsDiv.select(":contains(liczba stron)").parents().last().select("dd").text());
 

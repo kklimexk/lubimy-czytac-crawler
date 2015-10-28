@@ -1,6 +1,7 @@
 package pl.edu.agh.model;
 
 import javax.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -61,6 +62,18 @@ public class Publisher {
     public void setBooks(Set<Book> books) {
         this.books = books;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if (!(obj instanceof Publisher)) {
+    		return false;
+    	}
+    	Publisher cat = (Publisher) obj;
+    	if(cat.name.equals(this.name)) {
+    		return true;
+    	}
+    	return false;
+    };
 
     @Override
     public String toString() {

@@ -1,6 +1,7 @@
 package pl.edu.agh.model;
 
 import javax.persistence.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class User {
     @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(name = "friends",
             joinColumns = {@JoinColumn(name = "userId")},
-            inverseJoinColumns = {@JoinColumn(name = "userId")})
+            inverseJoinColumns = {@JoinColumn(name = "friendId")})
     private Set<User> friends = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.ALL})
@@ -39,6 +40,9 @@ public class User {
             joinColumns = {@JoinColumn(name = "userId")},
             inverseJoinColumns = {@JoinColumn(name = "bookId")})
     private Set<Book> wantToReadBooks = new HashSet<>();
+    
+    @ManyToMany(mappedBy = "friends")
+    private Set<User> friendsForMapping = new HashSet<>();
 
     public User() {
     }

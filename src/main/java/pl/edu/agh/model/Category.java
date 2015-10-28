@@ -70,6 +70,18 @@ public class Category {
     public void setUrl(String url) {
         this.url = url;
     }
+    
+    @Override
+    public boolean equals(Object obj) {
+    	if (!(obj instanceof Category)) {
+    		return false;
+    	}
+    	Category cat = (Category) obj;
+    	if(cat.name.equals(this.name)) {
+    		return true;
+    	}
+    	return false;
+    };
 
     @Override
     public String toString() {

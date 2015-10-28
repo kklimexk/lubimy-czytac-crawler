@@ -13,7 +13,7 @@ public class PublisherDAO {
         Session session = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            Query q = session.createQuery("from User");
+            Query q = session.createQuery("from Publisher");
             List<Publisher> publishers = q.list();
             return publishers;
         } catch(Exception e) {

@@ -9,7 +9,7 @@
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
         <property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/lubimyczytacdb</property>
         <property name="hibernate.connection.username">postgres</property>
-        <property name="hibernate.connection.password">postgres</property>
+        <property name="hibernate.connection.password">admin</property>
 
         <property name="hbm2ddl.auto">update</property>
         <property name="show_sql">true</property>
@@ -19,6 +19,7 @@
         <mapping class="pl.edu.agh.model.Book"/>
         <mapping class="pl.edu.agh.model.Author"/>
         <mapping class="pl.edu.agh.model.Publisher"/>
+        <mapping class="pl.edu.agh.model.Comment"/>
 
     </session-factory>
 </hibernate-configuration>

@@ -1,222 +1,252 @@
 package pl.edu.agh.model;
 
 import javax.persistence.*;
+
+import pl.edu.agh.service.AuthorService;
+import pl.edu.agh.service.PublisherService;
+
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Entity
-@Table(name = "books", uniqueConstraints = @UniqueConstraint(columnNames = {"isbn"}))
+@Table(name = "books", uniqueConstraints = @UniqueConstraint(columnNames = { "isbn" }))
 public class Book {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    private String name;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
+	private String name;
 
-    @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name = "writtenBy",
-            joinColumns = {@JoinColumn(name = "bookId")},
-            inverseJoinColumns = {@JoinColumn(name = "authorId")})
-    private Set<Author> authors = new HashSet<>();
-    @ManyToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "publisherId")
-    private Publisher publisher;
-    private Double ratingValue;
-    private Integer ratingVotes;
-    private Integer ratingReviews;
-    private Date datePublished;
-    private String isbn;
-    private Integer numOfPages;
-    @ManyToMany(cascade = {CascadeType.ALL})
-    @JoinTable(name = "belongsToCategory",
-            joinColumns = {@JoinColumn(name = "bookId")},
-            inverseJoinColumns = {@JoinColumn(name = "categoryId")})
-    private Set<Category> categories = new HashSet<>();
-    private String language;
-    @Column(columnDefinition = "TEXT")
-    private String description;
-    private String url;
+	@ManyToMany(cascade = { CascadeType.ALL })
+	@JoinTable(name = "writtenBy", joinColumns = { @JoinColumn(name = "bookId") }, inverseJoinColumns = { @JoinColumn(name = "authorId") })
+	private Set<Author> authors = new HashSet<>();
+	@ManyToOne(cascade = {CascadeType.ALL})
+	@JoinColumn(name = "publisherId")
+	private Publisher publisher;
+	private Double ratingValue;
+	private Integer ratingVotes;
+	private Integer ratingReviews;
+	private Date datePublished;
+	private String isbn;
+	private Integer numOfPages;
+	@ManyToMany(cascade = { CascadeType.ALL })
+	@JoinTable(name = "belongsToCategory", joinColumns = { @JoinColumn(name = "bookId") }, inverseJoinColumns = { @JoinColumn(name = "categoryId") })
+	private Set<Category> categories = new HashSet<>();
+	private String language;
+	@Column(columnDefinition = "TEXT")
+	private String description;
+	private String url;
 
-    @ManyToMany(mappedBy = "readBooks")
-    private Set<User> usersReadBooks = new HashSet<>();
-    @ManyToMany(mappedBy = "currentlyReadingBooks")
-    private Set<User> usersCurrentlyReadingBooks = new HashSet<>();
-    @ManyToMany(mappedBy = "wantToReadBooks")
-    private Set<User> usersWantToReadBooks = new HashSet<>();
+	@ManyToMany(mappedBy = "readBooks")
+	private Set<User> usersReadBooks = new HashSet<>();
+	@ManyToMany(mappedBy = "currentlyReadingBooks")
+	private Set<User> usersCurrentlyReadingBooks = new HashSet<>();
+	@ManyToMany(mappedBy = "wantToReadBooks")
+	private Set<User> usersWantToReadBooks = new HashSet<>();
 
-    public Book() {
-    }
+	public Book() {
+	}
 
-    public Book(String name, Set<Author> authors, Publisher publisher, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, Set<Category> categories, String language, String description, String url) {
-        this.name = name;
-        this.authors = authors;
-        this.publisher = publisher;
-        this.ratingValue = ratingValue;
-        this.ratingVotes = ratingVotes;
-        this.ratingReviews = ratingReviews;
-        this.datePublished = datePublished;
-        this.isbn = isbn;
-        this.numOfPages = numOfPages;
-        this.categories = categories;
-        this.language = language;
-        this.description = description;
-        this.url = url;
-    }
+	public Book(String name, Set<Author> authors, Publisher publisher,
+			Double ratingValue, Integer ratingVotes, Integer ratingReviews,
+			Date datePublished, String isbn, Integer numOfPages,
+			Set<Category> categories, String language, String description,
+			String url) {
+		this.name = name;
 
-    public Long getId() {
-        return id;
-    }
+		Set<Author> checkedAuthors = new HashSet<Author>();
+		List<Author> authorsInBase = new AuthorService().getAllAuthors();
+		for (Author author : authors) {
+			Optional<Author> inBase = null;
+			if (authorsInBase != null) {
+				inBase = authorsInBase.stream()
+						.filter(a -> a.getName().equals(author.getName()))
+						.findAny();
+				if (inBase.isPresent()) {
+					checkedAuthors.add(inBase.get());
+				} else {
+					checkedAuthors.add(author);
+				}
+			} else {
+				checkedAuthors.add(author);
+			}
+		}
+		this.authors = checkedAuthors;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+		this.publisher = publisher;
 
-    public String getName() {
-        return name;
-    }
+		Optional<Publisher> inBase = null;
+		List<Publisher> publishers = new PublisherService().getAllPublishers();
+		if (publisher != null) {
+			inBase = publishers.stream()
+					.filter(pub -> pub.getName().equals(publisher.getName()))
+					.findAny();
+			if (inBase.isPresent()) {
+				this.publisher = inBase.get();
+			}
+		}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+		this.ratingValue = ratingValue;
+		this.ratingVotes = ratingVotes;
+		this.ratingReviews = ratingReviews;
+		this.datePublished = datePublished;
+		this.isbn = isbn;
+		this.numOfPages = numOfPages;
+		this.categories = categories;
+		this.language = language;
+		this.description = description;
+		this.url = url;
+	}
 
-    public Set<Author> getAuthors() {
-        return authors;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setAuthors(Set<Author> authors) {
-        this.authors = authors;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public Publisher getPublisher() {
-        return publisher;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setPublisher(Publisher publisher) {
-        this.publisher = publisher;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public Double getRatingValue() {
-        return ratingValue;
-    }
+	public Set<Author> getAuthors() {
+		return authors;
+	}
 
-    public void setRatingValue(Double ratingValue) {
-        this.ratingValue = ratingValue;
-    }
+	public void setAuthors(Set<Author> authors) {
+		this.authors = authors;
+	}
 
-    public Integer getRatingVotes() {
-        return ratingVotes;
-    }
+	public Publisher getPublisher() {
+		return publisher;
+	}
 
-    public void setRatingVotes(Integer ratingVotes) {
-        this.ratingVotes = ratingVotes;
-    }
+	public void setPublisher(Publisher publisher) {
+		this.publisher = publisher;
+	}
 
-    public Integer getRatingReviews() {
-        return ratingReviews;
-    }
+	public Double getRatingValue() {
+		return ratingValue;
+	}
 
-    public void setRatingReviews(Integer ratingReviews) {
-        this.ratingReviews = ratingReviews;
-    }
+	public void setRatingValue(Double ratingValue) {
+		this.ratingValue = ratingValue;
+	}
 
-    public Date getDatePublished() {
-        return datePublished;
-    }
+	public Integer getRatingVotes() {
+		return ratingVotes;
+	}
 
-    public void setDatePublished(Date datePublished) {
-        this.datePublished = datePublished;
-    }
+	public void setRatingVotes(Integer ratingVotes) {
+		this.ratingVotes = ratingVotes;
+	}
 
-    public String getIsbn() {
-        return isbn;
-    }
+	public Integer getRatingReviews() {
+		return ratingReviews;
+	}
 
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
-    }
+	public void setRatingReviews(Integer ratingReviews) {
+		this.ratingReviews = ratingReviews;
+	}
 
-    public Integer getNumOfPages() {
-        return numOfPages;
-    }
+	public Date getDatePublished() {
+		return datePublished;
+	}
 
-    public void setNumOfPages(Integer numOfPages) {
-        this.numOfPages = numOfPages;
-    }
+	public void setDatePublished(Date datePublished) {
+		this.datePublished = datePublished;
+	}
 
-    public Set<Category> getCategories() {
-        return categories;
-    }
+	public String getIsbn() {
+		return isbn;
+	}
 
-    public void setCategories(Set<Category> categories) {
-        this.categories = categories;
-    }
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
+	}
 
-    public String getLanguage() {
-        return language;
-    }
+	public Integer getNumOfPages() {
+		return numOfPages;
+	}
 
-    public void setLanguage(String language) {
-        this.language = language;
-    }
+	public void setNumOfPages(Integer numOfPages) {
+		this.numOfPages = numOfPages;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public Set<Category> getCategories() {
+		return categories;
+	}
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+	public void setCategories(Set<Category> categories) {
+		this.categories = categories;
+	}
 
-    public String getUrl() {
-        return url;
-    }
+	public String getLanguage() {
+		return language;
+	}
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	public void setLanguage(String language) {
+		this.language = language;
+	}
 
-    public Set<User> getUsersReadBooks() {
-        return usersReadBooks;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public void setUsersReadBooks(Set<User> usersReadBooks) {
-        this.usersReadBooks = usersReadBooks;
-    }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    public Set<User> getUsersCurrentlyReadingBooks() {
-        return usersCurrentlyReadingBooks;
-    }
+	public String getUrl() {
+		return url;
+	}
 
-    public void setUsersCurrentlyReadingBooks(Set<User> usersCurrentlyReadingBooks) {
-        this.usersCurrentlyReadingBooks = usersCurrentlyReadingBooks;
-    }
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
-    public Set<User> getUsersWantToReadBooks() {
-        return usersWantToReadBooks;
-    }
+	public Set<User> getUsersReadBooks() {
+		return usersReadBooks;
+	}
 
-    public void setUsersWantToReadBooks(Set<User> usersWantToReadBooks) {
-        this.usersWantToReadBooks = usersWantToReadBooks;
-    }
+	public void setUsersReadBooks(Set<User> usersReadBooks) {
+		this.usersReadBooks = usersReadBooks;
+	}
 
-    @Override
-    public String toString() {
-        return "Book{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", authors=" + authors +
-                ", publisher=" + publisher +
-                ", ratingValue=" + ratingValue +
-                ", ratingVotes=" + ratingVotes +
-                ", ratingReviews=" + ratingReviews +
-                ", datePublished=" + datePublished +
-                ", isbn='" + isbn + '\'' +
-                ", numOfPages=" + numOfPages +
-                ", categories=" + categories +
-                ", language='" + language + '\'' +
-                ", description='" + description + '\'' +
-                ", url='" + url + '\'' +
-                '}';
-    }
+	public Set<User> getUsersCurrentlyReadingBooks() {
+		return usersCurrentlyReadingBooks;
+	}
+
+	public void setUsersCurrentlyReadingBooks(
+			Set<User> usersCurrentlyReadingBooks) {
+		this.usersCurrentlyReadingBooks = usersCurrentlyReadingBooks;
+	}
+
+	public Set<User> getUsersWantToReadBooks() {
+		return usersWantToReadBooks;
+	}
+
+	public void setUsersWantToReadBooks(Set<User> usersWantToReadBooks) {
+		this.usersWantToReadBooks = usersWantToReadBooks;
+	}
+
+	@Override
+	public String toString() {
+		return "Book{" + "id=" + id + ", name='" + name + '\'' + ", authors="
+				+ authors + ", publisher=" + publisher + ", ratingValue="
+				+ ratingValue + ", ratingVotes=" + ratingVotes
+				+ ", ratingReviews=" + ratingReviews + ", datePublished="
+				+ datePublished + ", isbn='" + isbn + '\'' + ", numOfPages="
+				+ numOfPages + ", categories=" + categories + ", language='"
+				+ language + '\'' + ", description='" + description + '\''
+				+ ", url='" + url + '\'' + '}';
+	}
 }

@@ -11,7 +11,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name = "comments", uniqueConstraints = @UniqueConstraint(columnNames = {"isbn", "date"}))
+@Table(name = "comments", uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "date"}))
 public class Comment {
 
 	public Comment(Long bookId, Long userId, String content, Date date) {
