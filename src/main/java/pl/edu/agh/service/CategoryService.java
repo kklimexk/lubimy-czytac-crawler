@@ -15,4 +15,8 @@ public class CategoryService {
     public void saveCategory(Category category) {
         categoryDAO.saveCategory(category);
     }
+
+    public Category findByName(String name) {
+        return categoryDAO.findByName(name);
+    }
 }

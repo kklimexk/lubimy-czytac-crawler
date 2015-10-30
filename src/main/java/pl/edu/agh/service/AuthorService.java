@@ -15,4 +15,8 @@ public class AuthorService {
     public void saveAuthor(Author author) {
         authorDAO.saveAuthor(author);
     }
+
+    public Author findByName(String name) {
+        return authorDAO.findByName(name);
+    }
 }

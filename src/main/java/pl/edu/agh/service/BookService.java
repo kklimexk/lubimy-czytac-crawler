@@ -16,4 +16,8 @@ public class BookService {
     public void saveBook(Book book) {
         bookDAO.saveBook(book);
     }
+
+    public Book findByIsbn(String isbn) {
+        return bookDAO.findByIsbn(isbn);
+    }
 }

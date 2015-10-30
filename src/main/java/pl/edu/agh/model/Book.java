@@ -10,7 +10,7 @@ import java.util.Set;
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
 
@@ -46,6 +46,19 @@ public class Book {
     private Set<User> usersWantToReadBooks = new HashSet<>();
 
     public Book() {
+    }
+
+    public Book(String name, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, String language, String description, String url) {
+        this.name = name;
+        this.ratingValue = ratingValue;
+        this.ratingVotes = ratingVotes;
+        this.ratingReviews = ratingReviews;
+        this.datePublished = datePublished;
+        this.isbn = isbn;
+        this.numOfPages = numOfPages;
+        this.language = language;
+        this.description = description;
+        this.url = url;
     }
 
     public Book(String name, Set<Author> authors, Publisher publisher, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, Set<Category> categories, String language, String description, String url) {

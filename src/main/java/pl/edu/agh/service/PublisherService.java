@@ -15,4 +15,8 @@ public class PublisherService {
     public void savePublisher(Publisher publisher) {
         publisherDAO.savePublisher(publisher);
     }
+
+    public Publisher findByName(String name) {
+        return publisherDAO.findByName(name);
+    }
 }

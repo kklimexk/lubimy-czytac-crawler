@@ -4,11 +4,20 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import pl.edu.agh.model.Book;
+import pl.edu.agh.service.AuthorService;
+import pl.edu.agh.service.CategoryService;
+import pl.edu.agh.service.PublisherService;
 import pl.edu.agh.util.HibernateUtil;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class BookDAO {
+
+    private AuthorService authorService = new AuthorService();
+    private CategoryService categoryService = new CategoryService();
+    private PublisherService publisherService = new PublisherService();
+
     public List<Book> getAllBooks() {
         Session session = null;
         try {
@@ -33,7 +42,27 @@ public class BookDAO {
             try {
                 session = HibernateUtil.getSessionFactory().openSession();
                 tx = session.beginTransaction();
-                session.saveOrUpdate(book);
+                book.getAuthors().forEach(authorService::saveAuthor);
+                book.getCategories().forEach(categoryService::saveCategory);
+                publisherService.savePublisher(book.getPublisher());
+
+                Query query = session.createSQLQuery("INSERT INTO books (datepublished, description, isbn, language, name, numofpages, ratingreviews, ratingvalue, ratingvotes, url, publisherid)" +
+                        " VALUES (:datepublished, :description, :isbn, :language, :name, :numofpages, :ratingreviews, :ratingvalue, :ratingvotes, :url, :publisherid)");
+
+                query.setParameter("datepublished", book.getDatePublished());
+                query.setParameter("description", book.getDescription());
+                query.setParameter("isbn", book.getIsbn());
+                query.setParameter("language", book.getLanguage());
+                query.setParameter("name", book.getName());
+                query.setParameter("numofpages", book.getNumOfPages());
+                query.setParameter("ratingreviews", book.getRatingReviews());
+                query.setParameter("ratingvalue", book.getRatingValue());
+                query.setParameter("ratingvotes", book.getRatingVotes());
+                query.setParameter("url", book.getUrl());
+                query.setParameter("publisherid", BigInteger.valueOf(publisherService.findByName(book.getPublisher().getName()).getId()));
+
+                query.executeUpdate();
+
                 tx.commit();
             } catch (Exception e) {
                 if (tx != null) {

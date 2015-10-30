@@ -4,11 +4,14 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import pl.edu.agh.model.User;
+import pl.edu.agh.service.BookService;
 import pl.edu.agh.util.HibernateUtil;
 
 import java.util.List;
 
 public class UserDAO {
+
+    private BookService bookService = new BookService();
 
     public List<User> getAllUsers() {
         Session session = null;
@@ -34,7 +37,12 @@ public class UserDAO {
             try {
                 session = HibernateUtil.getSessionFactory().openSession();
                 tx = session.beginTransaction();
-                session.saveOrUpdate(user);
+
+                user.getReadBooks().forEach(bookService::saveBook);
+                /*user.getCurrentlyReadingBooks().forEach(bookService::saveBook);
+                user.getWantToReadBooks().forEach(bookService::saveBook);*/
+
+                //session.saveOrUpdate(user);
                 tx.commit();
             } catch (Exception e) {
                 if (tx != null) {
