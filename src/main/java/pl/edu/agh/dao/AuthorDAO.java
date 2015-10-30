@@ -30,20 +30,41 @@ public class AuthorDAO {
     public void saveAuthor(Author author) {
         Session session = null;
         Transaction tx = null;
+        if (findByName(author.getName()) == null) {
+            try {
+                session = HibernateUtil.getSessionFactory().openSession();
+                tx = session.beginTransaction();
+                session.saveOrUpdate(author);
+                tx.commit();
+            } catch (Exception e) {
+                if (tx != null) {
+                    tx.rollback();
+                }
+                e.printStackTrace();
+            } finally {
+                if (session != null) {
+                    session.close();
+                }
+            }
+        }
+    }
+
+    public Author findByName(String name) {
+        Session session = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            tx = session.beginTransaction();
-            session.save(author);
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
+            Query q = session.createQuery("FROM Author WHERE name = :name");
+            q.setParameter("name", name);
+            Author author = (Author) q.uniqueResult();
+            return author;
+        } catch(Exception e) {
             e.printStackTrace();
         } finally {
             if (session != null) {
                 session.close();
             }
         }
+        return null;
     }
+
 }

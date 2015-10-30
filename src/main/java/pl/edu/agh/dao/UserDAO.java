@@ -30,21 +30,41 @@ public class UserDAO {
     public void saveUser(User user) {
         Session session = null;
         Transaction tx = null;
+        if (findByName(user.getName()) == null) {
+            try {
+                session = HibernateUtil.getSessionFactory().openSession();
+                tx = session.beginTransaction();
+                session.saveOrUpdate(user);
+                tx.commit();
+            } catch (Exception e) {
+                if (tx != null) {
+                    tx.rollback();
+                }
+                e.printStackTrace();
+            } finally {
+                if (session != null) {
+                    session.close();
+                }
+            }
+        }
+    }
+
+    public User findByName(String name) {
+        Session session = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            tx = session.beginTransaction();
-            session.save(user);
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
+            Query q = session.createQuery("FROM User WHERE name = :name");
+            q.setParameter("name", name);
+            User user = (User) q.uniqueResult();
+            return user;
+        } catch(Exception e) {
             e.printStackTrace();
         } finally {
             if (session != null) {
                 session.close();
             }
         }
+        return null;
     }
 
 }

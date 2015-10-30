@@ -29,20 +29,40 @@ public class PublisherDAO {
     public void savePublisher(Publisher publisher) {
         Session session = null;
         Transaction tx = null;
+        if (findByName(publisher.getName()) == null) {
+            try {
+                session = HibernateUtil.getSessionFactory().openSession();
+                tx = session.beginTransaction();
+                session.saveOrUpdate(publisher);
+                tx.commit();
+            } catch (Exception e) {
+                if (tx != null) {
+                    tx.rollback();
+                }
+                e.printStackTrace();
+            } finally {
+                if (session != null) {
+                    session.close();
+                }
+            }
+        }
+    }
+
+    public Publisher findByName(String name) {
+        Session session = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            tx = session.beginTransaction();
-            session.save(publisher);
-            tx.commit();
-        } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
-            }
+            Query q = session.createQuery("FROM Publisher WHERE name = :name");
+            q.setParameter("name", name);
+            Publisher publisher = (Publisher) q.uniqueResult();
+            return publisher;
+        } catch(Exception e) {
             e.printStackTrace();
         } finally {
             if (session != null) {
                 session.close();
             }
         }
+        return null;
     }
 }
