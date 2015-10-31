@@ -3,6 +3,8 @@ package pl.edu.agh.crawler;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pl.edu.agh.http.PageDownloader;
 import pl.edu.agh.model.*;
 import pl.edu.agh.util.CrawlerUtil;
@@ -11,11 +13,12 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class LubimyCzytacCrawlerService implements ICrawlerService {
+
+    final Logger logger = LoggerFactory.getLogger(LubimyCzytacCrawlerService.class);
 
     @Override
     public User crawlUserFromUrl(Document doc) {
@@ -32,21 +35,54 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
         Element basicInformationDiv = profileHeaderInfoDiv.select("div.font-szary-a3.spacer-10-t").first();
         String basicInformation = basicInformationDiv.text();
 
-        return new User(userName, userDescription, basicInformation, doc.location());
+        String readBooksUrl = "";
+        String currentlyReadingBooksUrl = "";
+        String wantToReadBooksUrl = "";
+
+        try {
+            Document shelf = PageDownloader.getPage(doc.location() + "/biblioteczka/miniatury");
+            readBooksUrl = shelf.select("a[href*=/przeczytane/]").first().attr("abs:href");
+            currentlyReadingBooksUrl = shelf.select("a[href*=/teraz-czytam/]").first().attr("abs:href");
+            wantToReadBooksUrl = shelf.select("a[href*=/chce-przeczytac/]").first().attr("abs:href");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new User(userName, userDescription, basicInformation, doc.location(), readBooksUrl, currentlyReadingBooksUrl, wantToReadBooksUrl);
     }
 
     @Override
-    public Set<Book> crawlUserBooksFromUrl(Document doc) {
+    public Set<Book> crawlUserBooksFromUrl(Document doc, OptionalInt lastPageOpt) {
 
-        Elements booksList = doc.select("a[href~=/ksiazka/[0-9]+/]");
-        Set<Book> books = booksList.stream().map(bookEl -> {
-            try {
-                return crawlBookFromUrl(PageDownloader.getPage(bookEl.attr("href")));
-            } catch (IOException e) {
-                e.printStackTrace();
+        Set<Book> books = new HashSet<>();
+        try {
+            Element pagerDefault = doc.select("table.pager-default").first();
+            Element tdClassCentered = pagerDefault.select("td.centered").first();
+
+            Integer lastPage = null;
+            if (lastPageOpt.isPresent()) lastPage = lastPageOpt.getAsInt();
+            else lastPage = Integer.valueOf(tdClassCentered.getElementsByTag("li").last().text());
+
+            for (int i = 1; i <= lastPage; ++i) {
+                logger.info("Crawling: " + i + " page");
+
+                Document bookPage = PageDownloader.getPage(doc.location() + "/" + i);
+
+                Elements booksList = bookPage.select("a[href~=/ksiazka/[0-9]+/]");
+                books.addAll(booksList.stream().map(bookEl -> {
+                    try {
+                        Book book = crawlBookFromUrl(PageDownloader.getPage(bookEl.attr("href")));
+                        logger.info(book.toString());
+                        return book;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }).collect(Collectors.toSet()));
             }
-            return null;
-        }).collect(Collectors.toSet());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         return books;
     }
@@ -76,10 +112,19 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
 
             Element dBookDetailsDiv = doc.getElementById("dBookDetails");
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date datePublished = dateFormat.parse(dBookDetailsDiv.select("dd[itemprop=datePublished]").attr("content"));
+            Date datePublished = null;
+            Elements datePublishedElement = dBookDetailsDiv.select("dd[itemprop=datePublished]");
+            if (!datePublishedElement.isEmpty()) {
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                datePublished = dateFormat.parse(datePublishedElement.attr("content"));
+            }
+
             String isbn = dBookDetailsDiv.select("span[itemprop=isbn]").text();
-            Integer numOfPages = Integer.parseInt(dBookDetailsDiv.select(":contains(liczba stron)").parents().last().select("dd").text());
+
+            Integer numOfPages = null;
+            Elements numOfPagesElement = dBookDetailsDiv.select(":contains(liczba stron)");
+            if (!numOfPagesElement.isEmpty())
+                numOfPages = Integer.parseInt(numOfPagesElement.parents().last().select("dd").text());
 
             Elements categoryElements = dBookDetailsDiv.select("a[itemprop=genre]");
             Set<Category> categories = categoryElements.stream().map(categoryElem -> new Category(categoryElem.getElementsByTag("span").text(), "http://lubimyczytac.pl/" + categoryElem.attr("href"))).collect(Collectors.toSet());

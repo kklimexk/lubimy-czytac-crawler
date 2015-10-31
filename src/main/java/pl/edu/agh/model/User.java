@@ -15,6 +15,9 @@ public class User {
     private String description;
     private String basicInformation;
     private String url;
+    private String readBooksUrl;
+    private String currentlyReadingBooksUrl;
+    private String wantToReadBooksUrl;
 
     @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(name = "read",
@@ -37,11 +40,14 @@ public class User {
     public User() {
     }
 
-    public User(String name, String description, String basicInformation, String url) {
+    public User(String name, String description, String basicInformation, String url, String readBooksUrl, String currentlyReadingBooksUrl, String wantToReadBooksUrl) {
         this.name = name;
         this.description = description;
         this.basicInformation = basicInformation;
         this.url = url;
+        this.readBooksUrl = readBooksUrl;
+        this.currentlyReadingBooksUrl = currentlyReadingBooksUrl;
+        this.wantToReadBooksUrl = wantToReadBooksUrl;
     }
 
     public Long getId() {
@@ -84,6 +90,30 @@ public class User {
         this.url = url;
     }
 
+    public String getReadBooksUrl() {
+        return readBooksUrl;
+    }
+
+    public void setReadBooksUrl(String readBooksUrl) {
+        this.readBooksUrl = readBooksUrl;
+    }
+
+    public String getCurrentlyReadingBooksUrl() {
+        return currentlyReadingBooksUrl;
+    }
+
+    public void setCurrentlyReadingBooksUrl(String currentlyReadingBooksUrl) {
+        this.currentlyReadingBooksUrl = currentlyReadingBooksUrl;
+    }
+
+    public String getWantToReadBooksUrl() {
+        return wantToReadBooksUrl;
+    }
+
+    public void setWantToReadBooksUrl(String wantToReadBooksUrl) {
+        this.wantToReadBooksUrl = wantToReadBooksUrl;
+    }
+
     public Set<Book> getReadBooks() {
         return readBooks;
     }
@@ -116,7 +146,12 @@ public class User {
                 ", description='" + description + '\'' +
                 ", basicInformation='" + basicInformation + '\'' +
                 ", url='" + url + '\'' +
+                ", readBooksUrl='" + readBooksUrl + '\'' +
+                ", currentlyReadingBooksUrl='" + currentlyReadingBooksUrl + '\'' +
+                ", wantToReadBooksUrl='" + wantToReadBooksUrl + '\'' +
+                ", readBooks=" + readBooks +
+                ", currentlyReadingBooks=" + currentlyReadingBooks +
+                ", wantToReadBooks=" + wantToReadBooks +
                 '}';
     }
-
 }

@@ -1,10 +1,10 @@
 package pl.edu.agh.app;
 
 import pl.edu.agh.crawler.ICrawlerService;
+import pl.edu.agh.crawler.LubimyCzytacCrawler;
 import pl.edu.agh.crawler.LubimyCzytacCrawlerService;
 import pl.edu.agh.http.PageDownloader;
-import pl.edu.agh.model.Book;
-import pl.edu.agh.model.User;
+import pl.edu.agh.model.*;
 import pl.edu.agh.service.*;
 
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class LubimyCzytacCrawlerApp {
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         ICrawlerService lubimyCzytacCrawlerService = new LubimyCzytacCrawlerService();
 
         UserService userService = new UserService();
@@ -43,8 +43,32 @@ public class LubimyCzytacCrawlerApp {
             Set<Book> books = lubimyCzytacCrawlerService.crawlUserBooksFromUrl(PageDownloader.getPage("http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska/polka/2759/przeczytane/miniatury/1"));
             System.out.println(books);
 
+            Publisher publisher1 = new Publisher("p1", "p1");
+            Publisher publisher2 = new Publisher("p1", "p11");
+            publisherService.savePublisher(publisher1);
+            publisherService.savePublisher(publisher2);
+
+            Author author1 = new Author("a1", "a1");
+            Author author2 = new Author("a1", "a11");
+            authorService.saveAuthor(author1);
+            authorService.saveAuthor(author2);
+
+            Category category1 = new Category("c1", "c1");
+            Category category2 = new Category("c1", "c11");
+            categoryService.saveCategory(category1);
+            categoryService.saveCategory(category2);
+
+            user4.setReadBooks(books);
+            userService.saveUser(user4);
+
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }*/
+
+    public static void main(String[] args) {
+        LubimyCzytacCrawler lubimyCzytacCrawler = new LubimyCzytacCrawler();
+        lubimyCzytacCrawler.crawl();
     }
 }
