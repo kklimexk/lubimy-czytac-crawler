@@ -57,10 +57,14 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
         Set<Book> books = new HashSet<>();
         try {
             Element pagerDefault = doc.select("table.pager-default").first();
-            Element tdClassCentered = pagerDefault.select("td.centered").first();
+            Element tdClassCentered = null;
+
+            if (pagerDefault != null) tdClassCentered = pagerDefault.select("td.centered").first();
 
             Integer lastPage = null;
-            if (lastPageOpt.isPresent()) lastPage = lastPageOpt.getAsInt();
+
+            if (pagerDefault == null) lastPage = 1;
+            else if (lastPageOpt.isPresent()) lastPage = lastPageOpt.getAsInt();
             else lastPage = Integer.valueOf(tdClassCentered.getElementsByTag("li").last().text());
 
             for (int i = 1; i <= lastPage; ++i) {

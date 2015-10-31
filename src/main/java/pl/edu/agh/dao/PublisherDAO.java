@@ -29,7 +29,7 @@ public class PublisherDAO {
     public void savePublisher(Publisher publisher) {
         Session session = null;
         Transaction tx = null;
-        if (findByName(publisher.getName()) == null) {
+        if (publisher != null && findByName(publisher.getName()) == null) {
             try {
                 session = HibernateUtil.getSessionFactory().openSession();
                 tx = session.beginTransaction();

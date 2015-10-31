@@ -7,6 +7,7 @@ import pl.edu.agh.model.User;
 import pl.edu.agh.service.BookService;
 import pl.edu.agh.util.HibernateUtil;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class UserDAO {
@@ -39,11 +40,32 @@ public class UserDAO {
                 tx = session.beginTransaction();
 
                 user.getReadBooks().forEach(bookService::saveBook);
-                /*user.getCurrentlyReadingBooks().forEach(bookService::saveBook);
-                user.getWantToReadBooks().forEach(bookService::saveBook);*/
+                user.getCurrentlyReadingBooks().forEach(bookService::saveBook);
+                user.getWantToReadBooks().forEach(bookService::saveBook);
 
-                //session.saveOrUpdate(user);
                 tx.commit();
+
+                tx = session.beginTransaction();
+
+                Query query = session.createSQLQuery("INSERT INTO users (name, description, basicInformation, url, readBooksUrl, currentlyReadingBooksUrl, wantToReadBooksUrl)" +
+                        " VALUES (:name, :description, :basicInformation, :url, :readBooksUrl, :currentlyReadingBooksUrl, :wantToReadBooksUrl)");
+
+                query.setParameter("name", user.getName());
+                query.setParameter("description", user.getDescription());
+                query.setParameter("basicInformation", user.getBasicInformation());
+                query.setParameter("url", user.getUrl());
+                query.setParameter("readBooksUrl", user.getReadBooksUrl());
+                query.setParameter("currentlyReadingBooksUrl", user.getCurrentlyReadingBooksUrl());
+                query.setParameter("wantToReadBooksUrl", user.getWantToReadBooksUrl());
+
+                query.executeUpdate();
+
+                tx.commit();
+
+                saveReadBooks(user);
+                saveReadingBooks(user);
+                saveWantToReadBooks(user);
+
             } catch (Exception e) {
                 if (tx != null) {
                     tx.rollback();
@@ -53,6 +75,102 @@ public class UserDAO {
                 if (session != null) {
                     session.close();
                 }
+            }
+        }
+    }
+
+    public void saveReadBooks(User user) {
+        Session session = null;
+        final Transaction[] tx = {null};
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+
+            final Session finalSession = session;
+
+            user.getReadBooks().forEach(b -> {
+                tx[0] = finalSession.beginTransaction();
+                Query query = finalSession.createSQLQuery("INSERT INTO read (userid, bookid)" +
+                        " VALUES (:userid, :bookid)");
+
+                query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
+                query.setParameter("bookid", BigInteger.valueOf(bookService.findByIsbn(b.getIsbn()).getId()));
+
+                query.executeUpdate();
+                tx[0].commit();
+            });
+
+        } catch (Exception e) {
+            if (tx[0] != null) {
+                tx[0].rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
+    public void saveReadingBooks(User user) {
+        Session session = null;
+        final Transaction[] tx = {null};
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+
+            final Session finalSession = session;
+
+            user.getCurrentlyReadingBooks().forEach(b -> {
+                tx[0] = finalSession.beginTransaction();
+                Query query = finalSession.createSQLQuery("INSERT INTO reading (userid, bookid)" +
+                        " VALUES (:userid, :bookid)");
+
+                query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
+                query.setParameter("bookid", BigInteger.valueOf(bookService.findByIsbn(b.getIsbn()).getId()));
+
+                query.executeUpdate();
+                tx[0].commit();
+            });
+
+        } catch (Exception e) {
+            if (tx[0] != null) {
+                tx[0].rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
+    public void saveWantToReadBooks(User user) {
+        Session session = null;
+        final Transaction[] tx = {null};
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+
+            final Session finalSession = session;
+
+            user.getWantToReadBooks().forEach(b -> {
+                tx[0] = finalSession.beginTransaction();
+                Query query = finalSession.createSQLQuery("INSERT INTO wanttoread (userid, bookid)" +
+                        " VALUES (:userid, :bookid)");
+
+                query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
+                query.setParameter("bookid", BigInteger.valueOf(bookService.findByIsbn(b.getIsbn()).getId()));
+
+                query.executeUpdate();
+                tx[0].commit();
+            });
+
+        } catch (Exception e) {
+            if (tx[0] != null) {
+                tx[0].rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
             }
         }
     }

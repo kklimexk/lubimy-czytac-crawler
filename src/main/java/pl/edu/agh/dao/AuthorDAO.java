@@ -30,7 +30,7 @@ public class AuthorDAO {
     public void saveAuthor(Author author) {
         Session session = null;
         Transaction tx = null;
-        if (findByName(author.getName()) == null) {
+        if (author != null && findByName(author.getName()) == null) {
             try {
                 session = HibernateUtil.getSessionFactory().openSession();
                 tx = session.beginTransaction();

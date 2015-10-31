@@ -42,24 +42,37 @@ public class BookDAO {
             try {
                 session = HibernateUtil.getSessionFactory().openSession();
                 tx = session.beginTransaction();
+
                 book.getAuthors().forEach(authorService::saveAuthor);
                 book.getCategories().forEach(categoryService::saveCategory);
                 publisherService.savePublisher(book.getPublisher());
 
-                Query query = session.createSQLQuery("INSERT INTO books (datepublished, description, isbn, language, name, numofpages, ratingreviews, ratingvalue, ratingvotes, url, publisherid)" +
-                        " VALUES (:datepublished, :description, :isbn, :language, :name, :numofpages, :ratingreviews, :ratingvalue, :ratingvotes, :url, :publisherid)");
+                tx.commit();
+
+                tx = session.beginTransaction();
+                Query query = null;
+                if (book.getPublisher() != null) {
+                    query = session.createSQLQuery("INSERT INTO books (datepublished, description, isbn, language, name, numofpages, ratingreviews, ratingvalue, ratingvotes, url, publisherid)" +
+                            " VALUES (:datepublished, :description, :isbn, :language, :name, :numofpages, :ratingreviews, :ratingvalue, :ratingvotes, :url, :publisherid)");
+
+                    query.setParameter("publisherid", BigInteger.valueOf(publisherService.findByName(book.getPublisher().getName()).getId()));
+
+                } else {
+                    query = session.createSQLQuery("INSERT INTO books (datepublished, description, isbn, language, name, numofpages, ratingreviews, ratingvalue, ratingvotes, url)" +
+                            " VALUES (:datepublished, :description, :isbn, :language, :name, :numofpages, :ratingreviews, :ratingvalue, :ratingvotes, :url)");
+                }
 
                 query.setParameter("datepublished", book.getDatePublished());
                 query.setParameter("description", book.getDescription());
                 query.setParameter("isbn", book.getIsbn());
                 query.setParameter("language", book.getLanguage());
                 query.setParameter("name", book.getName());
-                query.setParameter("numofpages", book.getNumOfPages());
+                if (book.getNumOfPages() == null) query.setParameter("numofpages", -1);
+                else query.setParameter("numofpages", book.getNumOfPages());
                 query.setParameter("ratingreviews", book.getRatingReviews());
                 query.setParameter("ratingvalue", book.getRatingValue());
                 query.setParameter("ratingvotes", book.getRatingVotes());
                 query.setParameter("url", book.getUrl());
-                query.setParameter("publisherid", BigInteger.valueOf(publisherService.findByName(book.getPublisher().getName()).getId()));
 
                 query.executeUpdate();
 
@@ -83,14 +96,14 @@ public class BookDAO {
 
     public void saveWrittenBy(Book book) {
         Session session = null;
-        Transaction tx = null;
+        final Transaction[] tx = {null};
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            tx = session.beginTransaction();
 
             final Session finalSession = session;
 
             book.getAuthors().forEach(a -> {
+                tx[0] = finalSession.beginTransaction();
                 Query query = finalSession.createSQLQuery("INSERT INTO writtenby (bookid, authorid)" +
                         " VALUES (:bookid, :authorid)");
 
@@ -98,12 +111,12 @@ public class BookDAO {
                 query.setParameter("authorid", BigInteger.valueOf(authorService.findByName(a.getName()).getId()));
 
                 query.executeUpdate();
+                tx[0].commit();
             });
 
-            tx.commit();
         } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
+            if (tx[0] != null) {
+                tx[0].rollback();
             }
             e.printStackTrace();
         } finally {
@@ -115,14 +128,14 @@ public class BookDAO {
 
     public void saveBelongsToCategory(Book book) {
         Session session = null;
-        Transaction tx = null;
+        final Transaction[] tx = {null};
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            tx = session.beginTransaction();
 
             final Session finalSession = session;
 
             book.getCategories().forEach(c -> {
+                tx[0] = finalSession.beginTransaction();
                 Query query = finalSession.createSQLQuery("INSERT INTO belongstocategory (bookid, categoryid)" +
                         " VALUES (:bookid, :categoryid)");
 
@@ -130,12 +143,12 @@ public class BookDAO {
                 query.setParameter("categoryid", BigInteger.valueOf(categoryService.findByName(c.getName()).getId()));
 
                 query.executeUpdate();
+                tx[0].commit();
             });
 
-            tx.commit();
         } catch (Exception e) {
-            if (tx != null) {
-                tx.rollback();
+            if (tx[0] != null) {
+                tx[0].rollback();
             }
             e.printStackTrace();
         } finally {

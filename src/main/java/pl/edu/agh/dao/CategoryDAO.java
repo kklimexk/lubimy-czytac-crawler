@@ -30,7 +30,7 @@ public class CategoryDAO {
     public void saveCategory(Category category) {
         Session session = null;
         Transaction tx = null;
-        if (findByName(category.getName()) == null) {
+        if (category != null && findByName(category.getName()) == null) {
             try {
                 session = HibernateUtil.getSessionFactory().openSession();
                 tx = session.beginTransaction();

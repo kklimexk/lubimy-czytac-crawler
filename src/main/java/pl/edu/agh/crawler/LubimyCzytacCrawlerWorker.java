@@ -27,10 +27,17 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
     @Override
     public void run() {
         try {
+
             Document userPage = PageDownloader.getPage("http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska");
             User user = crawlerService.crawlUserFromUrl(userPage);
+
             Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(2));
+            Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(2));
+            Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(2));
+
             user.setReadBooks(readBooks);
+            user.setCurrentlyReadingBooks(currentlyReadingBooks);
+            user.setWantToReadBooks(wantToReadBooks);
 
             userService.saveUser(user);
 
