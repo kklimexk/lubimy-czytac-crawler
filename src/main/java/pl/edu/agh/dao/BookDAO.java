@@ -66,6 +66,7 @@ public class BookDAO {
                 tx.commit();
 
                 saveWrittenBy(book);
+                saveBelongsToCategory(book);
 
             } catch (Exception e) {
                 if (tx != null) {
@@ -90,13 +91,45 @@ public class BookDAO {
             final Session finalSession = session;
 
             book.getAuthors().forEach(a -> {
-                Query query2 = finalSession.createSQLQuery("INSERT INTO writtenby (bookid, authorid)" +
+                Query query = finalSession.createSQLQuery("INSERT INTO writtenby (bookid, authorid)" +
                         " VALUES (:bookid, :authorid)");
 
-                query2.setParameter("bookid", BigInteger.valueOf(findByIsbn(book.getIsbn()).getId()));
-                query2.setParameter("authorid", a.getId());
+                query.setParameter("bookid", BigInteger.valueOf(findByIsbn(book.getIsbn()).getId()));
+                query.setParameter("authorid", BigInteger.valueOf(authorService.findByName(a.getName()).getId()));
 
-                query2.executeUpdate();
+                query.executeUpdate();
+            });
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
+    public void saveBelongsToCategory(Book book) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            tx = session.beginTransaction();
+
+            final Session finalSession = session;
+
+            book.getCategories().forEach(c -> {
+                Query query = finalSession.createSQLQuery("INSERT INTO belongstocategory (bookid, categoryid)" +
+                        " VALUES (:bookid, :categoryid)");
+
+                query.setParameter("bookid", BigInteger.valueOf(findByIsbn(book.getIsbn()).getId()));
+                query.setParameter("categoryid", BigInteger.valueOf(categoryService.findByName(c.getName()).getId()));
+
+                query.executeUpdate();
             });
 
             tx.commit();
