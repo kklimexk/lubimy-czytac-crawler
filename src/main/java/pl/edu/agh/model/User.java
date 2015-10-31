@@ -37,6 +37,15 @@ public class User {
             inverseJoinColumns = {@JoinColumn(name = "bookId")})
     private Set<Book> wantToReadBooks = new HashSet<>();
 
+    @ManyToMany(cascade = {CascadeType.ALL})
+    @JoinTable(name = "friends",
+            joinColumns = {@JoinColumn(name = "userId")},
+            inverseJoinColumns = {@JoinColumn(name = "friendId")})
+    private Set<User> friends = new HashSet<>();
+
+    @ManyToMany(mappedBy = "friends")
+    private Set<User> mappedFriends = new HashSet<>();
+
     public User() {
     }
 
@@ -136,6 +145,22 @@ public class User {
 
     public void setWantToReadBooks(Set<Book> wantToReadBooks) {
         this.wantToReadBooks = wantToReadBooks;
+    }
+
+    public Set<User> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(Set<User> friends) {
+        this.friends = friends;
+    }
+
+    public Set<User> getMappedFriends() {
+        return mappedFriends;
+    }
+
+    public void setMappedFriends(Set<User> mappedFriends) {
+        this.mappedFriends = mappedFriends;
     }
 
     @Override
