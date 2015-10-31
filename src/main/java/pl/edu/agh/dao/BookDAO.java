@@ -25,7 +25,7 @@ public class BookDAO {
             Query q = session.createQuery("from Book");
             List<Book> books = q.list();
             return books;
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (session != null) {
@@ -64,6 +64,9 @@ public class BookDAO {
                 query.executeUpdate();
 
                 tx.commit();
+
+                saveWrittenBy(book);
+
             } catch (Exception e) {
                 if (tx != null) {
                     tx.rollback();
@@ -77,6 +80,38 @@ public class BookDAO {
         }
     }
 
+    public void saveWrittenBy(Book book) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            tx = session.beginTransaction();
+
+            final Session finalSession = session;
+
+            book.getAuthors().forEach(a -> {
+                Query query2 = finalSession.createSQLQuery("INSERT INTO writtenby (bookid, authorid)" +
+                        " VALUES (:bookid, :authorid)");
+
+                query2.setParameter("bookid", BigInteger.valueOf(findByIsbn(book.getIsbn()).getId()));
+                query2.setParameter("authorid", a.getId());
+
+                query2.executeUpdate();
+            });
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
     public Book findByIsbn(String isbn) {
         Session session = null;
         try {
@@ -85,7 +120,7 @@ public class BookDAO {
             q.setParameter("isbn", isbn);
             Book book = (Book) q.uniqueResult();
             return book;
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (session != null) {
