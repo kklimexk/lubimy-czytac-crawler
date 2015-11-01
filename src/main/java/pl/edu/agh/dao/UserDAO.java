@@ -34,7 +34,7 @@ public class UserDAO {
     public void saveUser(User user) {
         Session session = null;
         Transaction tx = null;
-        if (findByName(user.getName()) == null) {
+        if (user != null && findByName(user.getName()) == null) {
             try {
                 session = HibernateUtil.getSessionFactory().openSession();
                 tx = session.beginTransaction();
@@ -161,6 +161,40 @@ public class UserDAO {
 
                 query.executeUpdate();
                 tx[0].commit();
+            });
+
+        } catch (Exception e) {
+            if (tx[0] != null) {
+                tx[0].rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
+    public void saveFriends(User user) {
+        Session session = null;
+        final Transaction[] tx = {null};
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+
+            final Session finalSession = session;
+
+            user.getFriends().forEach(f -> {
+                if (f != null) {
+                    tx[0] = finalSession.beginTransaction();
+                    Query query = finalSession.createSQLQuery("INSERT INTO friends (userid, friendid)" +
+                            " VALUES (:userid, :friendid)");
+
+                    query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
+                    query.setParameter("friendid", BigInteger.valueOf(findByName(f.getName()).getId()));
+
+                    query.executeUpdate();
+                    tx[0].commit();
+                }
             });
 
         } catch (Exception e) {

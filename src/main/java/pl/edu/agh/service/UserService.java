@@ -17,6 +17,10 @@ public class UserService {
         userDAO.saveUser(user);
     }
 
+    public void saveUserFriends(User user) {
+        userDAO.saveFriends(user);
+    }
+
     public User findByName(String name) {
         return userDAO.findByName(name);
     }

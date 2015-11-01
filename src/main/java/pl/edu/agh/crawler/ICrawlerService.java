@@ -12,4 +12,5 @@ public interface ICrawlerService {
     User crawlUserFromUrl(Document doc);
     Book crawlBookFromUrl(Document doc);
     Set<Book> crawlUserBooksFromUrl(Document doc, OptionalInt lastPageOpt);
+    Set<User> crawlUserFriendsFromUrl(Document doc, OptionalInt lastPageOpt);
 }

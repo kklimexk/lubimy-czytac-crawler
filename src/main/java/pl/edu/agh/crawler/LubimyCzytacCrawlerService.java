@@ -22,6 +22,9 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
 
     @Override
     public User crawlUserFromUrl(Document doc) {
+
+        if (doc.location().contains("brak-uprawnien-konto")) return null;
+
         Element profileHeader = doc.getElementsByClass("profile-header").first();
 
         Element userNameH = profileHeader.getElementsByClass("title").first();
@@ -68,7 +71,7 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
             else lastPage = Integer.valueOf(tdClassCentered.getElementsByTag("li").last().text());
 
             for (int i = 1; i <= lastPage; ++i) {
-                logger.info("Crawling: " + i + " page");
+                logger.info("Crawling (books): " + i + " page");
 
                 Document bookPage = PageDownloader.getPage(doc.location() + "/" + i);
 
@@ -89,6 +92,46 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
         }
 
         return books;
+    }
+
+    @Override
+    public Set<User> crawlUserFriendsFromUrl(Document doc, OptionalInt lastPageOpt) {
+        Set<User> users = new HashSet<>();
+        try {
+            Element pagerDefault = doc.select("table.pager-default").first();
+            Element tdClassCentered = null;
+
+            if (pagerDefault != null) tdClassCentered = pagerDefault.select("td.centered").first();
+
+            Integer lastPage = null;
+
+            if (pagerDefault == null) lastPage = 1;
+            else if (lastPageOpt.isPresent()) lastPage = lastPageOpt.getAsInt();
+            else lastPage = Integer.valueOf(tdClassCentered.getElementsByTag("li").last().text());
+
+            for (int i = 1; i <= lastPage; ++i) {
+                logger.info("Crawling (users): " + i + " page");
+                Document friendsDoc = PageDownloader.getPage(doc.location() + "/" + i);
+                Element accountList = friendsDoc.select("ul.account-list").first();
+                Elements accountsElements = accountList.select("a.name");
+                users.addAll(accountsElements.stream().map(account -> {
+                    try {
+                        User user = crawlUserFromUrl(PageDownloader.getPage(account.attr("href")));
+                        if (user != null) {
+                            logger.info(user.toString());
+                            return user;
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }).collect(Collectors.toSet()));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return users;
     }
 
     @Override

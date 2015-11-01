@@ -27,10 +27,11 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
     @Override
     public void run() {
         try {
+            //Crawlowanie dla jednego usera jego ksiazki
+            String userUrl = "http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska";
+            Document userPage = PageDownloader.getPage(userUrl);
 
-            Document userPage = PageDownloader.getPage("http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska");
             User user = crawlerService.crawlUserFromUrl(userPage);
-
             Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(2));
             Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(2));
             Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(2));
@@ -38,8 +39,13 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
             user.setReadBooks(readBooks);
             user.setCurrentlyReadingBooks(currentlyReadingBooks);
             user.setWantToReadBooks(wantToReadBooks);
-
             userService.saveUser(user);
+
+            //Crawlowanie znajomych powyzszego uzytkownika
+            Set<User> friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(userUrl + "/znajomi"), OptionalInt.of(2));
+            friends.forEach(userService::saveUser);
+            user.setFriends(friends);
+            userService.saveUserFriends(user);
 
         } catch (IOException e) {
             e.printStackTrace();
