@@ -37,6 +37,7 @@ public class Book {
     @Column(columnDefinition = "TEXT")
     private String description;
     private String url;
+    private Integer numOfComments;
 
     @ManyToMany(mappedBy = "readBooks")
     private Set<User> usersReadBooks = new HashSet<>();
@@ -61,7 +62,7 @@ public class Book {
         this.url = url;
     }
 
-    public Book(String name, Set<Author> authors, Publisher publisher, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, Set<Category> categories, String language, String description, String url) {
+    public Book(String name, Set<Author> authors, Publisher publisher, Double ratingValue, Integer ratingVotes, Integer ratingReviews, Date datePublished, String isbn, Integer numOfPages, Set<Category> categories, String language, String description, String url, Integer numOfComments) {
         this.name = name;
         this.authors = authors;
         this.publisher = publisher;
@@ -75,6 +76,7 @@ public class Book {
         this.language = language;
         this.description = description;
         this.url = url;
+        this.numOfComments = numOfComments;
     }
 
     public Long getId() {
@@ -189,6 +191,14 @@ public class Book {
         this.url = url;
     }
 
+    public Integer getNumOfComments() {
+        return numOfComments;
+    }
+
+    public void setNumOfComments(Integer numOfComments) {
+        this.numOfComments = numOfComments;
+    }
+
     public Set<User> getUsersReadBooks() {
         return usersReadBooks;
     }
@@ -230,6 +240,7 @@ public class Book {
                 ", language='" + language + '\'' +
                 ", description='" + description + '\'' +
                 ", url='" + url + '\'' +
+                ", numOfComments=" + numOfComments +
                 '}';
     }
 }

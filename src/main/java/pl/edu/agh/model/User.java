@@ -18,6 +18,9 @@ public class User {
     private String readBooksUrl;
     private String currentlyReadingBooksUrl;
     private String wantToReadBooksUrl;
+    private Integer numOfReadBooks;
+    private Integer numOfCurrentlyReadingBooks;
+    private Integer numOfWantToReadBooks;
 
     @ManyToMany(cascade = {CascadeType.ALL})
     @JoinTable(name = "read",
@@ -49,7 +52,7 @@ public class User {
     public User() {
     }
 
-    public User(String name, String description, String basicInformation, String url, String readBooksUrl, String currentlyReadingBooksUrl, String wantToReadBooksUrl) {
+    public User(String name, String description, String basicInformation, String url, String readBooksUrl, String currentlyReadingBooksUrl, String wantToReadBooksUrl, Integer numOfReadBooks, Integer numOfCurrentlyReadingBooks, Integer numOfWantToReadBooks) {
         this.name = name;
         this.description = description;
         this.basicInformation = basicInformation;
@@ -57,6 +60,9 @@ public class User {
         this.readBooksUrl = readBooksUrl;
         this.currentlyReadingBooksUrl = currentlyReadingBooksUrl;
         this.wantToReadBooksUrl = wantToReadBooksUrl;
+        this.numOfReadBooks = numOfReadBooks;
+        this.numOfCurrentlyReadingBooks = numOfCurrentlyReadingBooks;
+        this.numOfWantToReadBooks = numOfWantToReadBooks;
     }
 
     public Long getId() {
@@ -163,6 +169,30 @@ public class User {
         this.mappedFriends = mappedFriends;
     }
 
+    public Integer getNumOfReadBooks() {
+        return numOfReadBooks;
+    }
+
+    public void setNumOfReadBooks(Integer numOfReadBooks) {
+        this.numOfReadBooks = numOfReadBooks;
+    }
+
+    public Integer getNumOfCurrentlyReadingBooks() {
+        return numOfCurrentlyReadingBooks;
+    }
+
+    public void setNumOfCurrentlyReadingBooks(Integer numOfCurrentlyReadingBooks) {
+        this.numOfCurrentlyReadingBooks = numOfCurrentlyReadingBooks;
+    }
+
+    public Integer getNumOfWantToReadBooks() {
+        return numOfWantToReadBooks;
+    }
+
+    public void setNumOfWantToReadBooks(Integer numOfWantToReadBooks) {
+        this.numOfWantToReadBooks = numOfWantToReadBooks;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -174,6 +204,9 @@ public class User {
                 ", readBooksUrl='" + readBooksUrl + '\'' +
                 ", currentlyReadingBooksUrl='" + currentlyReadingBooksUrl + '\'' +
                 ", wantToReadBooksUrl='" + wantToReadBooksUrl + '\'' +
+                ", numOfReadBooks=" + numOfReadBooks +
+                ", numOfCurrentlyReadingBooks=" + numOfCurrentlyReadingBooks +
+                ", numOfWantToReadBooks=" + numOfWantToReadBooks +
                 ", readBooks=" + readBooks +
                 ", currentlyReadingBooks=" + currentlyReadingBooks +
                 ", wantToReadBooks=" + wantToReadBooks +

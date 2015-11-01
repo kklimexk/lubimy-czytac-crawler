@@ -39,19 +39,32 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
         String basicInformation = basicInformationDiv.text();
 
         String readBooksUrl = "";
+        Integer numOfReadBooks = 0;
         String currentlyReadingBooksUrl = "";
+        Integer numOfCurrentlyReadingBooks = 0;
         String wantToReadBooksUrl = "";
+        Integer numOfWantToReadBooks = 0;
 
         try {
             Document shelf = PageDownloader.getPage(doc.location() + "/biblioteczka/miniatury");
-            readBooksUrl = shelf.select("a[href*=/przeczytane/]").first().attr("abs:href");
-            currentlyReadingBooksUrl = shelf.select("a[href*=/teraz-czytam/]").first().attr("abs:href");
-            wantToReadBooksUrl = shelf.select("a[href*=/chce-przeczytac/]").first().attr("abs:href");
+
+            Element readBooksUrlEl = shelf.select("a[href*=/przeczytane/]").first();
+            readBooksUrl = readBooksUrlEl.attr("abs:href");
+            numOfReadBooks = Integer.valueOf(readBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+
+            Element currentlyReadingBooksUrlEl = shelf.select("a[href*=/teraz-czytam/]").first();
+            currentlyReadingBooksUrl = currentlyReadingBooksUrlEl.attr("abs:href");
+            numOfCurrentlyReadingBooks = Integer.valueOf(currentlyReadingBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+
+            Element wantToReadBooksUrlEl = shelf.select("a[href*=/chce-przeczytac/]").first();
+            wantToReadBooksUrl = wantToReadBooksUrlEl.attr("abs:href");
+            numOfWantToReadBooks = Integer.valueOf(wantToReadBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new User(userName, userDescription, basicInformation, doc.location(), readBooksUrl, currentlyReadingBooksUrl, wantToReadBooksUrl);
+        return new User(userName, userDescription, basicInformation, doc.location(), readBooksUrl, currentlyReadingBooksUrl, wantToReadBooksUrl, numOfReadBooks, numOfCurrentlyReadingBooks, numOfWantToReadBooks);
     }
 
     @Override
@@ -191,7 +204,9 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
             String language = dBookDetailsDiv.select("dd[itemprop=inLanguage").text();
             String description = doc.select("p.description.regularText").text();
 
-            return new Book(bookName, authors, publisher, ratingValue, ratingVotes, ratingAmount, datePublished, isbn, numOfPages, categories, language, description, doc.location());
+            Integer numOfComments = Integer.valueOf(doc.getElementById("headerReviewsCounter").text());
+
+            return new Book(bookName, authors, publisher, ratingValue, ratingVotes, ratingAmount, datePublished, isbn, numOfPages, categories, language, description, doc.location(), numOfComments);
         } catch (ParseException e) {
             e.printStackTrace();
         }

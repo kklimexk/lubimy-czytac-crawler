@@ -52,14 +52,14 @@ public class BookDAO {
                 tx = session.beginTransaction();
                 Query query = null;
                 if (book.getPublisher() != null) {
-                    query = session.createSQLQuery("INSERT INTO books (datepublished, description, isbn, language, name, numofpages, ratingreviews, ratingvalue, ratingvotes, url, publisherid)" +
-                            " VALUES (:datepublished, :description, :isbn, :language, :name, :numofpages, :ratingreviews, :ratingvalue, :ratingvotes, :url, :publisherid)");
+                    query = session.createSQLQuery("INSERT INTO books (datepublished, description, isbn, language, name, numofpages, ratingreviews, ratingvalue, ratingvotes, url, publisherid, numOfComments)" +
+                            " VALUES (:datepublished, :description, :isbn, :language, :name, :numofpages, :ratingreviews, :ratingvalue, :ratingvotes, :url, :publisherid, :numOfComments)");
 
                     query.setParameter("publisherid", BigInteger.valueOf(publisherService.findByName(book.getPublisher().getName()).getId()));
 
                 } else {
-                    query = session.createSQLQuery("INSERT INTO books (datepublished, description, isbn, language, name, numofpages, ratingreviews, ratingvalue, ratingvotes, url)" +
-                            " VALUES (:datepublished, :description, :isbn, :language, :name, :numofpages, :ratingreviews, :ratingvalue, :ratingvotes, :url)");
+                    query = session.createSQLQuery("INSERT INTO books (datepublished, description, isbn, language, name, numofpages, ratingreviews, ratingvalue, ratingvotes, url, numOfComments)" +
+                            " VALUES (:datepublished, :description, :isbn, :language, :name, :numofpages, :ratingreviews, :ratingvalue, :ratingvotes, :url, :numOfComments)");
                 }
 
                 query.setParameter("datepublished", book.getDatePublished());
@@ -73,6 +73,7 @@ public class BookDAO {
                 query.setParameter("ratingvalue", book.getRatingValue());
                 query.setParameter("ratingvotes", book.getRatingVotes());
                 query.setParameter("url", book.getUrl());
+                query.setParameter("numOfComments", book.getNumOfComments());
 
                 query.executeUpdate();
 
