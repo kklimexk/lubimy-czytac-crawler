@@ -41,9 +41,21 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
             user.setWantToReadBooks(wantToReadBooks);
             userService.saveUser(user);
 
-            //Crawlowanie znajomych powyzszego uzytkownika
+            //Crawlowanie znajomych powyzszego uzytkownika wraz z ich ksiazkami
             Set<User> friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(userUrl + "/znajomi"), OptionalInt.of(2));
-            friends.forEach(userService::saveUser);
+            friends.forEach(friend -> {
+                try {
+                    Set<Book> friendReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(friend.getReadBooksUrl()), OptionalInt.of(2));
+                    Set<Book> friendCurrentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(friend.getCurrentlyReadingBooksUrl()), OptionalInt.of(2));
+                    Set<Book> friendWantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(friend.getWantToReadBooksUrl()), OptionalInt.of(2));
+                    friend.setReadBooks(friendReadBooks);
+                    friend.setCurrentlyReadingBooks(friendCurrentlyReadingBooks);
+                    friend.setWantToReadBooks(friendWantToReadBooks);
+                    userService.saveUser(friend);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
             user.setFriends(friends);
             userService.saveUserFriends(user);
 

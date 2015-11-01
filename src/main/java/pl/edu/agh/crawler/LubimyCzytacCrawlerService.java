@@ -131,6 +131,7 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        users.remove(null);
         return users;
     }
 
@@ -153,9 +154,20 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
                 publisher = new Publisher(publisherName, publisherLink);
             }
 
-            Double ratingValue = Double.parseDouble(doc.getElementById("rating-value").select("span[itemprop=ratingValue]").text().replace(',', '.'));
-            Integer ratingVotes = Integer.parseInt(doc.getElementById("rating-votes").select("span[itemprop=ratingCount").text());
-            Integer ratingAmount = Integer.parseInt(doc.getElementById("rating-amount").text());
+            Double ratingValue = null;
+            Element ratingValueEl = doc.getElementById("rating-value");
+            if (ratingValueEl != null && !ratingValueEl.select("span[itemprop=ratingValue]").isEmpty() && !ratingValueEl.select("span[itemprop=ratingValue]").text().isEmpty())
+                ratingValue = Double.parseDouble(ratingValueEl.select("span[itemprop=ratingValue]").text().replace(',', '.'));
+
+            Integer ratingVotes = null;
+            Element ratingVotesEl = doc.getElementById("rating-votes");
+            if (ratingVotesEl != null && !ratingVotesEl.select("span[itemprop=ratingCount").isEmpty() && !ratingVotesEl.select("span[itemprop=ratingCount").text().isEmpty())
+                ratingVotes = Integer.parseInt(ratingVotesEl.select("span[itemprop=ratingCount").text());
+
+            Integer ratingAmount = null;
+            Element ratingAmountEl = doc.getElementById("rating-amount");
+            if (ratingAmountEl != null && !ratingAmountEl.text().isEmpty())
+                ratingAmount = Integer.parseInt(ratingAmountEl.text());
 
             Element dBookDetailsDiv = doc.getElementById("dBookDetails");
 
