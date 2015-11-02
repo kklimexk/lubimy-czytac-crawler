@@ -3,6 +3,7 @@ package pl.edu.agh.dao;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
 import pl.edu.agh.model.Book;
 import pl.edu.agh.service.AuthorService;
 import pl.edu.agh.service.CategoryService;
@@ -104,15 +105,22 @@ public class BookDAO {
             final Session finalSession = session;
 
             book.getAuthors().forEach(a -> {
-                tx[0] = finalSession.beginTransaction();
-                Query query = finalSession.createSQLQuery("INSERT INTO writtenby (bookid, authorid)" +
-                        " VALUES (:bookid, :authorid)");
-
-                query.setParameter("bookid", BigInteger.valueOf(findByIsbn(book.getIsbn()).getId()));
-                query.setParameter("authorid", BigInteger.valueOf(authorService.findByName(a.getName()).getId()));
-
-                query.executeUpdate();
-                tx[0].commit();
+	            try {
+	                tx[0] = finalSession.beginTransaction();
+	                Query query = finalSession.createSQLQuery("INSERT INTO writtenby (bookid, authorid)" +
+	                        " VALUES (:bookid, :authorid)");
+	
+	                query.setParameter("bookid", BigInteger.valueOf(findByIsbn(book.getIsbn()).getId()));
+	                query.setParameter("authorid", BigInteger.valueOf(authorService.findByName(a.getName()).getId()));
+	
+	                query.executeUpdate();
+	                tx[0].commit();
+	            } catch (Exception e) {
+                    if (tx[0] != null) {
+                        tx[0].rollback();
+                    }
+                    e.printStackTrace();
+                }
             });
 
         } catch (Exception e) {

@@ -95,15 +95,22 @@ public class UserDAO {
             final Session finalSession = session;
 
             user.getReadBooks().forEach(b -> {
-                tx[0] = finalSession.beginTransaction();
-                Query query = finalSession.createSQLQuery("INSERT INTO read (userid, bookid)" +
-                        " VALUES (:userid, :bookid)");
-
-                query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
-                query.setParameter("bookid", BigInteger.valueOf(bookService.findByIsbn(b.getIsbn()).getId()));
-
-                query.executeUpdate();
-                tx[0].commit();
+            	try {
+	                tx[0] = finalSession.beginTransaction();
+	                Query query = finalSession.createSQLQuery("INSERT INTO read (userid, bookid)" +
+	                        " VALUES (:userid, :bookid)");
+	
+	                query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
+	                query.setParameter("bookid", BigInteger.valueOf(bookService.findByIsbn(b.getIsbn()).getId()));
+	
+	                query.executeUpdate();
+	                tx[0].commit();
+            	} catch (Exception e) {
+                    if (tx[0] != null) {
+                        tx[0].rollback();
+                    }
+                    e.printStackTrace();
+                }
             });
 
         } catch (Exception e) {
@@ -127,15 +134,22 @@ public class UserDAO {
             final Session finalSession = session;
 
             user.getCurrentlyReadingBooks().forEach(b -> {
-                tx[0] = finalSession.beginTransaction();
-                Query query = finalSession.createSQLQuery("INSERT INTO reading (userid, bookid)" +
-                        " VALUES (:userid, :bookid)");
-
-                query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
-                query.setParameter("bookid", BigInteger.valueOf(bookService.findByIsbn(b.getIsbn()).getId()));
-
-                query.executeUpdate();
-                tx[0].commit();
+            	try {
+	                tx[0] = finalSession.beginTransaction();
+	                Query query = finalSession.createSQLQuery("INSERT INTO reading (userid, bookid)" +
+	                        " VALUES (:userid, :bookid)");
+	
+	                query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
+	                query.setParameter("bookid", BigInteger.valueOf(bookService.findByIsbn(b.getIsbn()).getId()));
+	
+	                query.executeUpdate();
+	                tx[0].commit();
+            	} catch (Exception e) {
+                    if (tx[0] != null) {
+                        tx[0].rollback();
+                    }
+                    e.printStackTrace();
+                }
             });
 
         } catch (Exception e) {
@@ -159,15 +173,22 @@ public class UserDAO {
             final Session finalSession = session;
 
             user.getWantToReadBooks().forEach(b -> {
-                tx[0] = finalSession.beginTransaction();
-                Query query = finalSession.createSQLQuery("INSERT INTO wanttoread (userid, bookid)" +
-                        " VALUES (:userid, :bookid)");
-
-                query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
-                query.setParameter("bookid", BigInteger.valueOf(bookService.findByIsbn(b.getIsbn()).getId()));
-
-                query.executeUpdate();
-                tx[0].commit();
+            	try {
+	                tx[0] = finalSession.beginTransaction();
+	                Query query = finalSession.createSQLQuery("INSERT INTO wanttoread (userid, bookid)" +
+	                        " VALUES (:userid, :bookid)");
+	
+	                query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
+	                query.setParameter("bookid", BigInteger.valueOf(bookService.findByIsbn(b.getIsbn()).getId()));
+	
+	                query.executeUpdate();
+	                tx[0].commit();
+            	} catch (Exception e) {
+                    if (tx[0] != null) {
+                        tx[0].rollback();
+                    }
+                    e.printStackTrace();
+                }
             });
 
         } catch (Exception e) {
@@ -192,15 +213,22 @@ public class UserDAO {
 
             user.getFriends().forEach(f -> {
                 if (f != null) {
-                    tx[0] = finalSession.beginTransaction();
-                    Query query = finalSession.createSQLQuery("INSERT INTO friends (userid, friendid)" +
-                            " VALUES (:userid, :friendid)");
-
-                    query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
-                    query.setParameter("friendid", BigInteger.valueOf(findByName(f.getName()).getId()));
-
-                    query.executeUpdate();
-                    tx[0].commit();
+                	try {
+	                    tx[0] = finalSession.beginTransaction();
+	                    Query query = finalSession.createSQLQuery("INSERT INTO friends (userid, friendid)" +
+	                            " VALUES (:userid, :friendid)");
+	
+	                    query.setParameter("userid", BigInteger.valueOf(findByName(user.getName()).getId()));
+	                    query.setParameter("friendid", BigInteger.valueOf(findByName(f.getName()).getId()));
+	
+	                    query.executeUpdate();
+	                    tx[0].commit();
+                	} catch (Exception e) {
+                        if (tx[0] != null) {
+                            tx[0].rollback();
+                        }
+                        e.printStackTrace();
+                    }
                 }
             });
 
