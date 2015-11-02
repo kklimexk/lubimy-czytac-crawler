@@ -7,6 +7,7 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hibernate.Hibernate;
 import org.jsoup.nodes.Document;
 
 import pl.edu.agh.http.PageDownloader;
@@ -39,9 +40,12 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
     public void run() {
         try {
             String userUrl = "http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska";
-            Document userPage = PageDownloader.getPage(userUrl);
 
-            User user = crawlerService.crawlUserFromUrl(userPage);
+            User user = userService.findByUrl(userUrl);
+            if (user == null) {
+                Document userPage = PageDownloader.getPage(userUrl);
+            	user = crawlerService.crawlUserFromUrl(userPage);            	
+            }
             saveUserWithBooks(user);
             saveUserFriends(user, userUrl);
 	            
@@ -69,12 +73,21 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
 	}
 	
 	private void saveUserWithBooks(User user) throws IOException {
-		Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), numberOfPagesToRead);
-        Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), numberOfPagesToRead);
-        Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), numberOfPagesToRead);
-        user.setReadBooks(readBooks);
-        user.setCurrentlyReadingBooks(currentlyReadingBooks);
-        user.setWantToReadBooks(wantToReadBooks);
+		// if at least half of the books are loaded, don't load more
+		// as it would require to read the whole pages once again
+		// and this is so very time consuming
+		if (user.getReadBooks().size() < user.getNumOfReadBooks() / 2) {
+			Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), numberOfPagesToRead);
+			user.setReadBooks(readBooks);
+		}
+		if (user.getCurrentlyReadingBooks().size() < user.getNumOfCurrentlyReadingBooks() / 2) {
+			Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), numberOfPagesToRead);
+			user.setCurrentlyReadingBooks(currentlyReadingBooks);
+		}
+		if (user.getWantToReadBooks().size() < user.getNumOfWantToReadBooks() / 2) {
+			Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), numberOfPagesToRead);
+			user.setWantToReadBooks(wantToReadBooks);			
+		}
         userService.saveUser(user);
 	}
 	

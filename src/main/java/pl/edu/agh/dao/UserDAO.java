@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -270,6 +271,12 @@ public class UserDAO {
             Query q = session.createQuery("FROM User WHERE url = :url");
             q.setParameter("url", url);
             User user = (User) q.uniqueResult();
+            if (user == null) {
+            	return null;
+            }
+            Hibernate.initialize(user.getReadBooks());
+            Hibernate.initialize(user.getCurrentlyReadingBooks());
+            Hibernate.initialize(user.getWantToReadBooks());
             return user;
         } catch(Exception e) {
             e.printStackTrace();
