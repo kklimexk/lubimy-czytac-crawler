@@ -29,6 +29,7 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
     private final PublisherService publisherService = new PublisherService();
     private LinkedList<User> usersToCrawl = new LinkedList<User>();
     private LinkedList<User> fullyReadUsers = new LinkedList<User>();
+    private final OptionalInt numberOfPagesToRead = OptionalInt.empty();
 
     public LubimyCzytacCrawlerWorker(ICrawlerService crawlerService) {
         this.crawlerService = crawlerService;
@@ -68,9 +69,9 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
 	}
 	
 	private void saveUserWithBooks(User user) throws IOException {
-		Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(1));
-        Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(1));
-        Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(1));
+		Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), numberOfPagesToRead);
+        Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), numberOfPagesToRead);
+        Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), numberOfPagesToRead);
         user.setReadBooks(readBooks);
         user.setCurrentlyReadingBooks(currentlyReadingBooks);
         user.setWantToReadBooks(wantToReadBooks);
@@ -78,7 +79,7 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
 	}
 	
 	private void saveUserFriends(User user, String userUrl) throws IOException {
-		Set<User> friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(userUrl + "/znajomi"), OptionalInt.of(1));
+		Set<User> friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(userUrl + "/znajomi"), numberOfPagesToRead);
         friends.forEach(friend -> userService.saveUser(friend));
         usersToCrawl.addAll(friends.stream().filter(friend -> !fullyReadUsers.contains(friend)).collect(Collectors.toList()));
         user.setFriends(friends);

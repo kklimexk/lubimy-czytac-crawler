@@ -49,21 +49,27 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
             Document shelf = PageDownloader.getPage(doc.location() + "/biblioteczka/miniatury");
 
             Element readBooksUrlEl = shelf.select("a[href*=/przeczytane/]").first();
-            readBooksUrl = readBooksUrlEl.attr("abs:href");
-            if (readBooksUrl != null) {
-            	numOfReadBooks = Integer.valueOf(readBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+            if(readBooksUrlEl != null) {
+	            readBooksUrl = readBooksUrlEl.attr("abs:href");
+	            if (readBooksUrl != null) {
+	            	numOfReadBooks = Integer.valueOf(readBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+	            }
             }
             
             Element currentlyReadingBooksUrlEl = shelf.select("a[href*=/teraz-czytam/]").first();
-            currentlyReadingBooksUrl = currentlyReadingBooksUrlEl.attr("abs:href");
-            if (currentlyReadingBooksUrl != null) {
-            	numOfCurrentlyReadingBooks = Integer.valueOf(currentlyReadingBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+            if(currentlyReadingBooksUrlEl != null) {
+	            currentlyReadingBooksUrl = currentlyReadingBooksUrlEl.attr("abs:href");
+	            if (currentlyReadingBooksUrl != null) {
+	            	numOfCurrentlyReadingBooks = Integer.valueOf(currentlyReadingBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+	            }
             }
             
             Element wantToReadBooksUrlEl = shelf.select("a[href*=/chce-przeczytac/]").first();
-            wantToReadBooksUrl = wantToReadBooksUrlEl.attr("abs:href");
-            if (wantToReadBooksUrl != null) {
-            	numOfWantToReadBooks = Integer.valueOf(wantToReadBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+            if(wantToReadBooksUrlEl != null) {
+	            wantToReadBooksUrl = wantToReadBooksUrlEl.attr("abs:href");
+	            if (wantToReadBooksUrl != null) {
+	            	numOfWantToReadBooks = Integer.valueOf(wantToReadBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+	            }
             }
             
         } catch (IOException e) {
