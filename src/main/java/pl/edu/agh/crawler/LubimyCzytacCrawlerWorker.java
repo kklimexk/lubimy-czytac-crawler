@@ -27,6 +27,8 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
     private final AuthorService authorService = new AuthorService();
     private final CategoryService categoryService = new CategoryService();
     private final PublisherService publisherService = new PublisherService();
+    private LinkedList<User> usersToCrawl = new LinkedList<User>();
+    private LinkedList<User> fullyReadUsers = new LinkedList<User>();
 
     public LubimyCzytacCrawlerWorker(ICrawlerService crawlerService) {
         this.crawlerService = crawlerService;
@@ -35,59 +37,52 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
     @Override
     public void run() {
         try {
-        	List<User> fullyReadUsers = new LinkedList<User>();
-        	
-            //Crawlowanie dla jednego usera jego ksiazki
             String userUrl = "http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska";
             Document userPage = PageDownloader.getPage(userUrl);
 
             User user = crawlerService.crawlUserFromUrl(userPage);
-            Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(1));
-            Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(1));
-            Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(1));
-            userService.saveUser(user);
-            user.setReadBooks(readBooks);
-            user.setCurrentlyReadingBooks(currentlyReadingBooks);
-            user.setWantToReadBooks(wantToReadBooks);
-            userService.saveUser(user);
-
-            //crawlowoanie znajomych
-            Set<User> friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(userUrl + "/znajomi"), OptionalInt.of(1));
-            friends.forEach(friend -> userService.saveUser(friend));
-            LinkedList<User> usersToCrawl = new LinkedList<User>(friends);
-            
-            user.setFriends(friends);
-            userService.saveUserFriends(user);
-            fullyReadUsers.add(user);
+            saveUserWithBooks(user);
+            saveUserFriends(user, userUrl);
 	            
             while (!usersToCrawl.isEmpty()) {
-            	user = usersToCrawl.pollFirst();
-            	while (fullyReadUsers.contains(user) && !usersToCrawl.isEmpty()) {
-            		user = usersToCrawl.pollFirst();
-            	}
+            	user = getNextUser();
             	if (fullyReadUsers.contains(user)) {
             		break;
             	}
-            	
-            	readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(1));
-                currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(1));
-                wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(1));
-
-                user.setReadBooks(readBooks);
-                user.setCurrentlyReadingBooks(currentlyReadingBooks);
-                user.setWantToReadBooks(wantToReadBooks);
-                userService.saveUser(user);
-                
-            	friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(user.getUrl() + "/znajomi"), OptionalInt.of(1));
-            	friends.forEach(friend -> userService.saveUser(friend));
-            	usersToCrawl.addAll(friends.stream().filter(friend -> !fullyReadUsers.contains(friend)).collect(Collectors.toList()));
-            	user.setFriends(friends);
-	            userService.saveUserFriends(user);
-	            fullyReadUsers.add(user);
+            	saveUserWithBooks(user);
+                saveUserFriends(user, user.getUrl());
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+	private User getNextUser() {
+		User user;
+		user = usersToCrawl.pollFirst();
+		while (fullyReadUsers.contains(user) && !usersToCrawl.isEmpty()) {
+			user = usersToCrawl.pollFirst();
+		}
+		return user;
+	}
+	
+	private void saveUserWithBooks(User user) throws IOException {
+		Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(1));
+        Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(1));
+        Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(1));
+        user.setReadBooks(readBooks);
+        user.setCurrentlyReadingBooks(currentlyReadingBooks);
+        user.setWantToReadBooks(wantToReadBooks);
+        userService.saveUser(user);
+	}
+	
+	private void saveUserFriends(User user, String userUrl) throws IOException {
+		Set<User> friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(userUrl + "/znajomi"), OptionalInt.of(1));
+        friends.forEach(friend -> userService.saveUser(friend));
+        usersToCrawl.addAll(friends.stream().filter(friend -> !fullyReadUsers.contains(friend)).collect(Collectors.toList()));
+        user.setFriends(friends);
+        userService.saveUserFriends(user);
+        fullyReadUsers.add(user);
+	}
 }
