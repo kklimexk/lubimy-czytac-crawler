@@ -42,17 +42,17 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
             Document userPage = PageDownloader.getPage(userUrl);
 
             User user = crawlerService.crawlUserFromUrl(userPage);
-            Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(2));
-            Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(2));
-            Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(2));
+            Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(1));
+            Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(1));
+            Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(1));
 
             user.setReadBooks(readBooks);
             user.setCurrentlyReadingBooks(currentlyReadingBooks);
             user.setWantToReadBooks(wantToReadBooks);
             userService.saveUser(user);
 
-            //Crawlowanie znajomych powyzszego uzytkownika wraz z ich ksiazkami
-            Set<User> friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(userUrl + "/znajomi"), OptionalInt.of(2));
+            //crawlowoanie znajomych
+            Set<User> friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(userUrl + "/znajomi"), OptionalInt.of(1));
             friends.forEach(friend -> userService.saveUser(friend));
             LinkedList<User> usersToCrawl = new LinkedList<User>(friends);
             
@@ -60,19 +60,25 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
             userService.saveUserFriends(user);
             fullyReadUsers.add(user);
 	            
-            while(!usersToCrawl.isEmpty()) {
+            while (!usersToCrawl.isEmpty()) {
             	user = usersToCrawl.pollFirst();
+            	while (fullyReadUsers.contains(user) && !usersToCrawl.isEmpty()) {
+            		user = usersToCrawl.pollFirst();
+            	}
+            	if (fullyReadUsers.contains(user)) {
+            		break;
+            	}
             	
-            	readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(2));
-                currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(2));
-                wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(2));
+            	readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(1));
+                currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(1));
+                wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(1));
 
                 user.setReadBooks(readBooks);
                 user.setCurrentlyReadingBooks(currentlyReadingBooks);
                 user.setWantToReadBooks(wantToReadBooks);
                 userService.saveUser(user);
-            	
-            	friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(userUrl + "/znajomi"), OptionalInt.of(2));
+                
+            	friends = crawlerService.crawlUserFriendsFromUrl(PageDownloader.getPage(user.getUrl() + "/znajomi"), OptionalInt.of(1));
             	friends.forEach(friend -> userService.saveUser(friend));
             	usersToCrawl.addAll(friends.stream().filter(friend -> !fullyReadUsers.contains(friend)).collect(Collectors.toList()));
             	user.setFriends(friends);

@@ -50,16 +50,22 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
 
             Element readBooksUrlEl = shelf.select("a[href*=/przeczytane/]").first();
             readBooksUrl = readBooksUrlEl.attr("abs:href");
-            numOfReadBooks = Integer.valueOf(readBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
-
+            if (readBooksUrl != null) {
+            	numOfReadBooks = Integer.valueOf(readBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+            }
+            
             Element currentlyReadingBooksUrlEl = shelf.select("a[href*=/teraz-czytam/]").first();
             currentlyReadingBooksUrl = currentlyReadingBooksUrlEl.attr("abs:href");
-            numOfCurrentlyReadingBooks = Integer.valueOf(currentlyReadingBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
-
+            if (currentlyReadingBooksUrl != null) {
+            	numOfCurrentlyReadingBooks = Integer.valueOf(currentlyReadingBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+            }
+            
             Element wantToReadBooksUrlEl = shelf.select("a[href*=/chce-przeczytac/]").first();
             wantToReadBooksUrl = wantToReadBooksUrlEl.attr("abs:href");
-            numOfWantToReadBooks = Integer.valueOf(wantToReadBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
-
+            if (wantToReadBooksUrl != null) {
+            	numOfWantToReadBooks = Integer.valueOf(wantToReadBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
+            }
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
