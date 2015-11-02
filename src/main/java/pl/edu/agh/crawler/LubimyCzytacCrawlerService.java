@@ -5,8 +5,11 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import pl.edu.agh.http.PageDownloader;
 import pl.edu.agh.model.*;
+import pl.edu.agh.service.BookService;
+import pl.edu.agh.service.UserService;
 import pl.edu.agh.util.CrawlerUtil;
 
 import java.io.IOException;
@@ -19,6 +22,8 @@ import java.util.stream.Collectors;
 public class LubimyCzytacCrawlerService implements ICrawlerService {
 
     final Logger logger = LoggerFactory.getLogger(LubimyCzytacCrawlerService.class);
+    final BookService bookService = new BookService();
+    final UserService userService = new UserService();
 
     @Override
     public User crawlUserFromUrl(Document doc) {
@@ -103,8 +108,12 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
                 Elements booksList = bookPage.select("a[href~=/ksiazka/[0-9]+/]");
                 books.addAll(booksList.stream().map(bookEl -> {
                     try {
-                        Book book = crawlBookFromUrl(PageDownloader.getPage(bookEl.attr("href")));
-                        logger.info(book.toString());
+                    	String url = bookEl.attr("href");
+                    	Book book = bookService.findByUrl(url);
+                    	if(book == null) {
+                        	book = crawlBookFromUrl(PageDownloader.getPage(url));
+                        	logger.info(book.toString());
+                    	}
                         return book;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -141,10 +150,17 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
                 Elements accountsElements = accountList.select("a.name");
                 users.addAll(accountsElements.stream().map(account -> {
                     try {
-                        User user = crawlUserFromUrl(PageDownloader.getPage(account.attr("href")));
-                        if (user != null) {
-                            logger.info(user.toString());
-                            return user;
+                    	String url = account.attr("href");
+                    	User user = userService.findByUrl(url);
+                    	if (user == null) {
+                        	user = crawlUserFromUrl(PageDownloader.getPage(account.attr("href")));
+                        	if (user != null) {
+    	                        logger.info(user.toString());
+    	                        return user;
+                            }
+                    	}
+                    	if (user != null) {
+	                        return user;
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

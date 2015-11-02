@@ -12,10 +12,6 @@ public class UserService {
     public List<User> getAllUsers() {
         return userDAO.getAllUsers();
     }
-    
-    public User findById(Long id) {
-    	return userDAO.findById(id);
-    }
 
     public void saveUser(User user) {
         userDAO.saveUser(user);
@@ -27,6 +23,10 @@ public class UserService {
 
     public User findByName(String name) {
         return userDAO.findByName(name);
+    }
+    
+    public User findByUrl(String url) {
+    	return userDAO.findByUrl(url);
     }
 
 }

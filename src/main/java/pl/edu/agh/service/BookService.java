@@ -20,4 +20,8 @@ public class BookService {
     public Book findByIsbn(String isbn) {
         return bookDAO.findByIsbn(isbn);
     }
+    
+    public Book findByUrl(String url) {
+    	return bookDAO.findByUrl(url);
+    }
 }

@@ -184,4 +184,22 @@ public class BookDAO {
         }
         return null;
     }
+    
+    public Book findByUrl(String url) {
+        Session session = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            Query q = session.createQuery("FROM Book WHERE url = :url");
+            q.setParameter("url", url);
+            Book book = (Book) q.uniqueResult();
+            return book;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+        return null;
+    }
 }

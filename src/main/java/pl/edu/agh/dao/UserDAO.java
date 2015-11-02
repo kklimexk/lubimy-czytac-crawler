@@ -1,6 +1,10 @@
 package pl.edu.agh.dao;
 
-import org.hibernate.Hibernate;
+import java.awt.print.Book;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Set;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -8,9 +12,6 @@ import org.hibernate.Transaction;
 import pl.edu.agh.model.User;
 import pl.edu.agh.service.BookService;
 import pl.edu.agh.util.HibernateUtil;
-
-import java.math.BigInteger;
-import java.util.List;
 
 public class UserDAO {
 
@@ -262,20 +263,22 @@ public class UserDAO {
         return null;
     }
 
-    public User findById(Long id) {
-        Session session = null;
-        User user = null;
+	public User findByUrl(String url) {
+		Session session = null;
         try {
             session = HibernateUtil.getSessionFactory().openSession();
-            user =  (User) session.get(User.class, id);
-        } catch (Exception e) {
-           e.printStackTrace();
+            Query q = session.createQuery("FROM User WHERE url = :url");
+            q.setParameter("url", url);
+            User user = (User) q.uniqueResult();
+            return user;
+        } catch(Exception e) {
+            e.printStackTrace();
         } finally {
-            if (session != null && session.isOpen()) {
+            if (session != null) {
                 session.close();
             }
         }
-        return user;
-    }
+        return null;
+	}
 
 }
