@@ -1,8 +1,10 @@
 package pl.edu.agh.dao;
 
+import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+
 import pl.edu.agh.model.User;
 import pl.edu.agh.service.BookService;
 import pl.edu.agh.util.HibernateUtil;
@@ -228,6 +230,22 @@ public class UserDAO {
             }
         }
         return null;
+    }
+
+    public User findById(Long id) {
+        Session session = null;
+        User user = null;
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
+            user =  (User) session.get(User.class, id);
+        } catch (Exception e) {
+           e.printStackTrace();
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
+        }
+        return user;
     }
 
 }
