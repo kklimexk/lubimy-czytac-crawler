@@ -45,7 +45,7 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
             Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), OptionalInt.of(1));
             Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), OptionalInt.of(1));
             Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), OptionalInt.of(1));
-
+            userService.saveUser(user);
             user.setReadBooks(readBooks);
             user.setCurrentlyReadingBooks(currentlyReadingBooks);
             user.setWantToReadBooks(wantToReadBooks);

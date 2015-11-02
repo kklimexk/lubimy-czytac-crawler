@@ -36,7 +36,7 @@ public class UserDAO {
     public void saveUser(User user) {
         Session session = null;
         Transaction tx = null;
-        if (user != null && findByName(user.getName()) == null) {
+        if (user != null) {
             try {
                 session = HibernateUtil.getSessionFactory().openSession();
                 tx = session.beginTransaction();
@@ -47,25 +47,27 @@ public class UserDAO {
 
                 tx.commit();
 
-                tx = session.beginTransaction();
-
-                Query query = session.createSQLQuery("INSERT INTO users (name, description, basicInformation, url, readBooksUrl, currentlyReadingBooksUrl, wantToReadBooksUrl, numOfReadBooks, numOfCurrentlyReadingBooks, numOfWantToReadBooks)" +
-                        " VALUES (:name, :description, :basicInformation, :url, :readBooksUrl, :currentlyReadingBooksUrl, :wantToReadBooksUrl, :numOfReadBooks, :numOfCurrentlyReadingBooks, :numOfWantToReadBooks)");
-
-                query.setParameter("name", user.getName());
-                query.setParameter("description", user.getDescription());
-                query.setParameter("basicInformation", user.getBasicInformation());
-                query.setParameter("url", user.getUrl());
-                query.setParameter("readBooksUrl", user.getReadBooksUrl());
-                query.setParameter("currentlyReadingBooksUrl", user.getCurrentlyReadingBooksUrl());
-                query.setParameter("wantToReadBooksUrl", user.getWantToReadBooksUrl());
-                query.setParameter("numOfReadBooks", user.getNumOfReadBooks());
-                query.setParameter("numOfCurrentlyReadingBooks", user.getNumOfCurrentlyReadingBooks());
-                query.setParameter("numOfWantToReadBooks", user.getNumOfWantToReadBooks());
-
-                query.executeUpdate();
-
-                tx.commit();
+                if(findByName(user.getName()) == null) {
+	                tx = session.beginTransaction();
+	
+	                Query query = session.createSQLQuery("INSERT INTO users (name, description, basicInformation, url, readBooksUrl, currentlyReadingBooksUrl, wantToReadBooksUrl, numOfReadBooks, numOfCurrentlyReadingBooks, numOfWantToReadBooks)" +
+	                        " VALUES (:name, :description, :basicInformation, :url, :readBooksUrl, :currentlyReadingBooksUrl, :wantToReadBooksUrl, :numOfReadBooks, :numOfCurrentlyReadingBooks, :numOfWantToReadBooks)");
+	
+	                query.setParameter("name", user.getName());
+	                query.setParameter("description", user.getDescription());
+	                query.setParameter("basicInformation", user.getBasicInformation());
+	                query.setParameter("url", user.getUrl());
+	                query.setParameter("readBooksUrl", user.getReadBooksUrl());
+	                query.setParameter("currentlyReadingBooksUrl", user.getCurrentlyReadingBooksUrl());
+	                query.setParameter("wantToReadBooksUrl", user.getWantToReadBooksUrl());
+	                query.setParameter("numOfReadBooks", user.getNumOfReadBooks());
+	                query.setParameter("numOfCurrentlyReadingBooks", user.getNumOfCurrentlyReadingBooks());
+	                query.setParameter("numOfWantToReadBooks", user.getNumOfWantToReadBooks());
+	
+	                query.executeUpdate();
+	
+	                tx.commit();
+                }
 
                 saveReadBooks(user);
                 saveReadingBooks(user);
