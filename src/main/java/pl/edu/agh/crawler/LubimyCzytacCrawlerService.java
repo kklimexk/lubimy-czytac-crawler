@@ -51,32 +51,45 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
         Integer numOfWantToReadBooks = 0;
 
         try {
-            Document shelf = PageDownloader.getPage(doc.location() + "/biblioteczka/miniatury");
+            Document shelfPage = PageDownloader.getAuthenticatedPage(doc.location() + "/biblioteczka/lista");
+            Elements shelfsEl = shelfPage.select("h5.title");
 
-            Element readBooksUrlEl = shelf.select("a[href*=/przeczytane/]").first();
-            if(readBooksUrlEl != null) {
-	            readBooksUrl = readBooksUrlEl.attr("abs:href");
-	            if (readBooksUrl != null) {
-	            	numOfReadBooks = Integer.valueOf(readBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
-	            }
+            Optional<Element> shelfsOpt = shelfsEl.stream().filter(el -> "Półki".equals(el.text())).findFirst();
+            Element shelfs = null;
+
+            if (shelfsOpt.isPresent()) {
+                shelfs = shelfsOpt.get().parent();
+
+                Element readBooksUrlEl = shelfs.select("a[href*=/przeczytane/]").first();
+                if (readBooksUrlEl != null) {
+                    readBooksUrl = readBooksUrlEl.attr("abs:href");
+                    if (readBooksUrl != null) {
+                        String numOfReadBooksStr = readBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text();
+                        if (numOfReadBooksStr != null && !numOfReadBooksStr.isEmpty())
+                            numOfReadBooks = Integer.valueOf(numOfReadBooksStr);
+                    }
+                }
+
+                Element currentlyReadingBooksUrlEl = shelfs.select("a[href*=/teraz-czytam/]").first();
+                if (currentlyReadingBooksUrlEl != null) {
+                    currentlyReadingBooksUrl = currentlyReadingBooksUrlEl.attr("abs:href");
+                    if (currentlyReadingBooksUrl != null) {
+                        String numOfCurrentlyReadingBooksStr = currentlyReadingBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text();
+                        if (numOfCurrentlyReadingBooksStr != null && !numOfCurrentlyReadingBooksStr.isEmpty())
+                            numOfCurrentlyReadingBooks = Integer.valueOf(numOfCurrentlyReadingBooksStr);
+                    }
+                }
+
+                Element wantToReadBooksUrlEl = shelfs.select("a[href*=/chce-przeczytac/]").first();
+                if (wantToReadBooksUrlEl != null) {
+                    wantToReadBooksUrl = wantToReadBooksUrlEl.attr("abs:href");
+                    if (wantToReadBooksUrl != null) {
+                        String numOfWantToReadBooksStr = wantToReadBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text();
+                        if (numOfWantToReadBooksStr != null && !numOfWantToReadBooksStr.isEmpty())
+                            numOfWantToReadBooks = Integer.valueOf(numOfWantToReadBooksStr);
+                    }
+                }
             }
-            
-            Element currentlyReadingBooksUrlEl = shelf.select("a[href*=/teraz-czytam/]").first();
-            if(currentlyReadingBooksUrlEl != null) {
-	            currentlyReadingBooksUrl = currentlyReadingBooksUrlEl.attr("abs:href");
-	            if (currentlyReadingBooksUrl != null) {
-	            	numOfCurrentlyReadingBooks = Integer.valueOf(currentlyReadingBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
-	            }
-            }
-            
-            Element wantToReadBooksUrlEl = shelf.select("a[href*=/chce-przeczytac/]").first();
-            if(wantToReadBooksUrlEl != null) {
-	            wantToReadBooksUrl = wantToReadBooksUrlEl.attr("abs:href");
-	            if (wantToReadBooksUrl != null) {
-	            	numOfWantToReadBooks = Integer.valueOf(wantToReadBooksUrlEl.parent().getElementsByAttribute("data-shelf-id-counter").text());
-	            }
-            }
-            
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -103,17 +116,17 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
             for (int i = 1; i <= lastPage; ++i) {
                 logger.info("Crawling (books): " + i + " page");
 
-                Document bookPage = PageDownloader.getPage(doc.location() + "/" + i);
+                Document bookPage = PageDownloader.getAuthenticatedPage(doc.location() + "/" + i);
 
-                Elements booksList = bookPage.select("a[href~=/ksiazka/[0-9]+/]");
+                Elements booksList = bookPage.select("a.bookTitle");
                 books.addAll(booksList.stream().map(bookEl -> {
                     try {
-                    	String url = bookEl.attr("href");
-                    	Book book = bookService.findByUrl(url);
-                    	if(book == null) {
-                        	book = crawlBookFromUrl(PageDownloader.getPage(url));
-                        	logger.info(book.toString());
-                    	}
+                        String url = bookEl.attr("href");
+                        Book book = bookService.findByUrl(url);
+                        if (book == null) {
+                            book = crawlBookFromUrl(PageDownloader.getPage(url));
+                            logger.info(book.toString());
+                        }
                         return book;
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -150,17 +163,17 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
                 Elements accountsElements = accountList.select("a.name");
                 users.addAll(accountsElements.stream().map(account -> {
                     try {
-                    	String url = account.attr("href");
-                    	User user = userService.findByUrl(url);
-                    	if (user == null) {
-                        	user = crawlUserFromUrl(PageDownloader.getPage(account.attr("href")));
-                        	if (user != null) {
-    	                        logger.info(user.toString());
-    	                        return user;
+                        String url = account.attr("href");
+                        User user = userService.findByUrl(url);
+                        if (user == null) {
+                            user = crawlUserFromUrl(PageDownloader.getAuthenticatedPage(account.attr("href")));
+                            if (user != null) {
+                                logger.info(user.toString());
+                                return user;
                             }
-                    	}
-                    	if (user != null) {
-	                        return user;
+                        }
+                        if (user != null) {
+                            return user;
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

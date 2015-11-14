@@ -43,7 +43,7 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
 
             User user = userService.findByUrl(userUrl);
             if (user == null) {
-                Document userPage = PageDownloader.getPage(userUrl);
+                Document userPage = PageDownloader.getAuthenticatedPage(userUrl);
             	user = crawlerService.crawlUserFromUrl(userPage);            	
             }
             saveUserWithBooks(user);
@@ -77,15 +77,15 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
 		// as it would require to read the whole pages once again
 		// and this is so very time consuming
 		if (user.getReadBooks().size() < user.getNumOfReadBooks() / 2) {
-			Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getReadBooksUrl()), numberOfPagesToRead);
+			Set<Book> readBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getAuthenticatedPage(user.getReadBooksUrl()), numberOfPagesToRead);
 			user.setReadBooks(readBooks);
 		}
 		if (user.getCurrentlyReadingBooks().size() < user.getNumOfCurrentlyReadingBooks() / 2) {
-			Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getCurrentlyReadingBooksUrl()), numberOfPagesToRead);
+			Set<Book> currentlyReadingBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getAuthenticatedPage(user.getCurrentlyReadingBooksUrl()), numberOfPagesToRead);
 			user.setCurrentlyReadingBooks(currentlyReadingBooks);
 		}
 		if (user.getWantToReadBooks().size() < user.getNumOfWantToReadBooks() / 2) {
-			Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getPage(user.getWantToReadBooksUrl()), numberOfPagesToRead);
+			Set<Book> wantToReadBooks = crawlerService.crawlUserBooksFromUrl(PageDownloader.getAuthenticatedPage(user.getWantToReadBooksUrl()), numberOfPagesToRead);
 			user.setWantToReadBooks(wantToReadBooks);			
 		}
         userService.saveUser(user);
