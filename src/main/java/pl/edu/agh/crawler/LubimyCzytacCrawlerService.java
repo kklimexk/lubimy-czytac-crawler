@@ -286,7 +286,8 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
 
                         String[] dataBuilder = bookEl.select("div.book-user-data").text().split("Skończył.*: ")[1].split(" ");
                         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                        Tuple<Long, Date> tuple = new Tuple<>(book.getId(), dateFormat.parse(dataBuilder[2] + "-" + MonthsEnum.getMonthIndex(dataBuilder[1]) + "-" + dataBuilder[0]));
+                        Tuple<Long, Date> tuple = null;
+                        if (book != null) tuple = new Tuple<>(book.getId(), dateFormat.parse(dataBuilder[2] + "-" + MonthsEnum.getMonthIndex(dataBuilder[1]) + "-" + dataBuilder[0]));
                         return tuple;
                     } catch (ParseException e) {
                         e.printStackTrace();
@@ -297,7 +298,7 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        whenRead.remove(null);
         return whenRead;
     }
 
