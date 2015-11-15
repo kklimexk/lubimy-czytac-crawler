@@ -11,6 +11,8 @@ import pl.edu.agh.model.*;
 import pl.edu.agh.service.BookService;
 import pl.edu.agh.service.UserService;
 import pl.edu.agh.util.CrawlerUtil;
+import pl.edu.agh.util.MonthsEnum;
+import pl.edu.agh.util.Tuple;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -252,6 +254,51 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public Set<Tuple<Long, Date>> crawlUserWhenReadFromUrl(Document doc, OptionalInt lastPageOpt) {
+
+        Set<Tuple<Long, Date>> whenRead = new HashSet<>();
+        try {
+            Element pagerDefault = doc.select("table.pager-default").first();
+            Element tdClassCentered = null;
+
+            if (pagerDefault != null) tdClassCentered = pagerDefault.select("td.centered").first();
+
+            Integer lastPage = null;
+
+            if (pagerDefault == null) lastPage = 1;
+            else if (lastPageOpt.isPresent()) lastPage = lastPageOpt.getAsInt();
+            else lastPage = Integer.valueOf(tdClassCentered.getElementsByTag("li").last().text());
+
+            for (int i = 1; i <= lastPage; ++i) {
+                logger.info("Crawling (books): " + i + " page");
+
+                Document bookPage = PageDownloader.getAuthenticatedPage(doc.location() + "/" + i);
+
+                Elements booksList = bookPage.select("div.book-data");
+                whenRead.addAll(booksList.stream().map(bookEl -> {
+                    try {
+                        Element bookUrlEl = bookEl.select("a.bookTitle").first();
+                        String url = bookUrlEl.attr("href");
+                        Book book = bookService.findByUrl(url);
+
+                        String[] dataBuilder = bookEl.select("div.book-user-data").text().split("Skończył.*: ")[1].split(" ");
+                        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        Tuple<Long, Date> tuple = new Tuple<>(book.getId(), dateFormat.parse(dataBuilder[2] + "-" + MonthsEnum.getMonthIndex(dataBuilder[1]) + "-" + dataBuilder[0]));
+                        return tuple;
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                }).collect(Collectors.toSet()));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return whenRead;
     }
 
 }

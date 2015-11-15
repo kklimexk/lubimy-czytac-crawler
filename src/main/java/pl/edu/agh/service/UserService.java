@@ -3,6 +3,7 @@ package pl.edu.agh.service;
 import pl.edu.agh.dao.UserDAO;
 import pl.edu.agh.model.User;
 
+import java.util.Date;
 import java.util.List;
 
 public class UserService {
@@ -27,6 +28,10 @@ public class UserService {
     
     public User findByUrl(String url) {
     	return userDAO.findByUrl(url);
+    }
+
+    public void saveWhenReadBooksByUser(Long userId, Long bookId, Date whenRead) {
+        userDAO.saveWhenReadBooksByUser(userId, bookId, whenRead);
     }
 
 }

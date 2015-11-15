@@ -1,28 +1,27 @@
 package pl.edu.agh.crawler;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.OptionalInt;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import org.hibernate.Hibernate;
 import org.jsoup.nodes.Document;
 
 import pl.edu.agh.http.PageDownloader;
 import pl.edu.agh.model.Book;
 import pl.edu.agh.model.User;
+import pl.edu.agh.schema.Schema;
 import pl.edu.agh.service.AuthorService;
 import pl.edu.agh.service.BookService;
 import pl.edu.agh.service.CategoryService;
 import pl.edu.agh.service.PublisherService;
 import pl.edu.agh.service.UserService;
+import pl.edu.agh.util.Tuple;
 
 public class LubimyCzytacCrawlerWorker implements Runnable {
 
     private final ICrawlerService crawlerService;
 
+    private final Schema schema = new Schema();
     private final UserService userService = new UserService();
     private final BookService bookService = new BookService();
     private final AuthorService authorService = new AuthorService();
@@ -39,6 +38,7 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
     @Override
     public void run() {
         try {
+            schema.addWhenReadColumnToReadTable();
             String userUrl = "http://lubimyczytac.pl/profil/802/joanna-kalio-golaszewska";
 
             User user = userService.findByUrl(userUrl);
@@ -48,6 +48,7 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
             }
             saveUserWithBooks(user);
             saveUserFriends(user, userUrl);
+            saveWhenReadBooksByUser(userService.findByUrl(userUrl));
 	            
             while (!usersToCrawl.isEmpty()) {
             	user = getNextUser();
@@ -56,6 +57,7 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
             	}
             	saveUserWithBooks(user);
                 saveUserFriends(user, user.getUrl());
+                saveWhenReadBooksByUser(userService.findByUrl(user.getUrl()));
             }
 
         } catch (IOException e) {
@@ -71,6 +73,15 @@ public class LubimyCzytacCrawlerWorker implements Runnable {
 		}
 		return user;
 	}
+
+    private void saveWhenReadBooksByUser(User user) throws IOException {
+        Set<Tuple<Long, Date>> whenReadBooks = crawlerService.crawlUserWhenReadFromUrl(PageDownloader.getAuthenticatedPage(user.getReadBooksUrl()), numberOfPagesToRead);
+        whenReadBooks.forEach(row -> {
+            if (user.getId() != null) {
+                userService.saveWhenReadBooksByUser(user.getId(), row.x, row.y);
+            }
+        });
+    }
 	
 	private void saveUserWithBooks(User user) throws IOException {
 		// if at least half of the books are loaded, don't load more
