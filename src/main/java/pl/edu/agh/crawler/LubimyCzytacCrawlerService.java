@@ -284,10 +284,13 @@ public class LubimyCzytacCrawlerService implements ICrawlerService {
                         String url = bookUrlEl.attr("href");
                         Book book = bookService.findByUrl(url);
 
-                        String[] dataBuilder = bookEl.select("div.book-user-data").text().split("Skończył.*: ")[1].split(" ");
+                        String[] dataBuilder = bookEl.select("div.book-user-data").text().split("Skończył.*: ");
+                        String[] dataB = null;
+                        if (dataBuilder.length >= 2) dataB = dataBuilder[1].split(" ");
+
                         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                         Tuple<Long, Date> tuple = null;
-                        if (book != null) tuple = new Tuple<>(book.getId(), dateFormat.parse(dataBuilder[2] + "-" + MonthsEnum.getMonthIndex(dataBuilder[1]) + "-" + dataBuilder[0]));
+                        if (book != null && dataB != null) tuple = new Tuple<>(book.getId(), dateFormat.parse(dataB[2] + "-" + MonthsEnum.getMonthIndex(dataB[1]) + "-" + dataB[0]));
                         return tuple;
                     } catch (ParseException e) {
                         e.printStackTrace();
